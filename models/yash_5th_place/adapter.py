@@ -1,0 +1,61 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import joblib
+import lightgbm as lgb
+import numpy as np
+from tokenizers import Tokenizer
+
+from evaluation.model_adapters import ModelAdapter, ModelNotAvailableError, require_probability_vector
+
+MODEL_DIR = Path(__file__).resolve().parent
+WEIGHTS = np.asarray([.05, .05, .05, .15, .15, .15, .40], dtype=float)
+
+
+class YashFifthPlaceAdapter(ModelAdapter):
+    """CPU inference adapter for the packaged, adapted BPE/TF-IDF ensemble."""
+
+    def __init__(self, artifact_dir: str | Path | None = None):
+        self.artifact_dir = Path(artifact_dir) if artifact_dir else MODEL_DIR / "artifacts"
+        self.model_ready = False
+        self.unavailable_reason = ""
+        self.tokenizer = self.vectorizer = self.classifiers = self.booster = None
+        required = ("configuration.json", "tokenizer.json", "tfidf_vectorizer.joblib",
+                    "classifiers.joblib", "lightgbm.txt")
+        missing = [name for name in required if not (self.artifact_dir / name).is_file()]
+        if missing:
+            self.unavailable_reason = "Missing fitted model artifacts: " + ", ".join(missing)
+            return
+        config = json.loads((self.artifact_dir / "configuration.json").read_text(encoding="utf-8"))
+        if config.get("model_id") != "yash_5th_place":
+            raise ValueError("Artifact configuration model_id is not yash_5th_place")
+        self.tokenizer = Tokenizer.from_file(str(self.artifact_dir / "tokenizer.json"))
+        self.vectorizer = joblib.load(self.artifact_dir / "tfidf_vectorizer.joblib")
+        self.classifiers = joblib.load(self.artifact_dir / "classifiers.joblib")
+        if len(self.classifiers) != 6:
+            raise ValueError("Expected six repository-trained sklearn ensemble members")
+        self.booster = lgb.Booster(model_file=str(self.artifact_dir / "lightgbm.txt"))
+        self.model_ready = True
+
+    def predict_proba(self, texts: list[str]) -> np.ndarray:
+        texts = list(texts)
+        if not texts:
+            return np.asarray([], dtype=np.float64)
+        if not self.model_ready:
+            raise ModelNotAvailableError(self.unavailable_reason)
+        output = []
+        for start in range(0, len(texts), 256):
+            batch = [str(text or "") for text in texts[start:start + 256]]
+            encoded = [" ".join(item.tokens) for item in self.tokenizer.encode_batch(batch)]
+            features = self.vectorizer.transform(encoded)
+            probabilities = []
+            for model in self.classifiers:
+                positive = np.flatnonzero(np.asarray(model.classes_) == 1)
+                if positive.size != 1:
+                    raise ValueError("Every fitted classifier must expose positive class 1")
+                probabilities.append(model.predict_proba(features)[:, int(positive[0])])
+            probabilities.append(self.booster.predict(features, num_threads=1))
+            output.extend(np.average(np.asarray(probabilities), axis=0, weights=WEIGHTS))
+        return require_probability_vector(output, len(texts))

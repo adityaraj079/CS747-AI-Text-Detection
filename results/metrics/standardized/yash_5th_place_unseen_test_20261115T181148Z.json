@@ -1,0 +1,49 @@
+{
+  "result_category": "standardized",
+  "model_id": "yash_5th_place",
+  "dataset_hash": "e6f09bceef8d6bd2334034ebcd0cc85f388e116f5abe9d9983d4037f6b611982",
+  "split_id": "0b635071c9aaccfc9d4973d7b0038db341b40f189fcf67ea8a6239246105e82f",
+  "dataset_type": "unseen_test",
+  "record_count": 31400,
+  "threshold": 0.5,
+  "timestamp": "2026-11-15T18:11:48.117698+00:00",
+  "software": {
+    "python": "3.13.2",
+    "numpy": "2.2.6",
+    "pandas": "2.2.3",
+    "scikit_learn": "1.6.1"
+  },
+  "benchmark": {
+    "batch_size": 256,
+    "warmup_steps": 3,
+    "repeats": 5,
+    "median_elapsed_seconds": 0.8046961000654846,
+    "milliseconds_per_essay": 3.1433441408807994,
+    "throughput_essays_per_second": 318.132522301484,
+    "cpu_model": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "system_info": "Windows-11-10.0.26200-SP0",
+    "python_version": "3.13.2",
+    "thread_count": 16
+  },
+  "roc_auc": 0.9991840158565862,
+  "accuracy": 0.9468152866242038,
+  "precision": 0.7643645626945939,
+  "recall": 0.9990751017388088,
+  "f1": 0.8661000641436819,
+  "confusion_matrix": [
+    [
+      24329,
+      1665
+    ],
+    [
+      5,
+      5401
+    ]
+  ],
+  "latency_ms_per_essay": 3.1433441408807994,
+  "throughput": 318.132522301484,
+  "cpu_model": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+  "thread_count": 16,
+  "batch_size": 256,
+  "model_size_mb": 15.334393501281738
+}
