@@ -15,7 +15,7 @@ def render_model_card(
     compact: bool = False,
 ) -> None:
     available, detail = availability
-    status = "Artifacts detected · runtime unverified" if available else spec.get("availability", "Not integrated")
+    status = "Adapter registered · artifacts detected" if available else spec.get("availability", "Not integrated")
     with st.container(border=True):
         st.markdown(f"### {spec['name']}")
         st.caption(spec.get("member", ""))

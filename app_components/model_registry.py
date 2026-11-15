@@ -33,6 +33,17 @@ def model_availability(model_id: str, repo_root: str | Path) -> tuple[bool, str]
         return False, "Adaptation artifacts are incomplete: " + ", ".join(missing)
     if model_id == "custom_model":
         return False, "Under development: no trained model package is registered."
+    if model_id == "aakash_7th_place":
+        artifacts = Path(repo_root) / "models" / model_id / "artifacts"
+        required = ("configuration.json", "tokenizer.json", "model.joblib")
+        missing = [name for name in required if not (artifacts / name).is_file()]
+        if missing:
+            return False, "Model artifacts are incomplete: " + ", ".join(missing)
+        return (
+            True,
+            "CPU adapter and artifacts are available. This model used a separate training split; "
+            "repository test scores are optimistic and not directly comparable.",
+        )
     if model_id == "yash_5th_place":
         artifacts = Path(repo_root) / "models" / model_id / "artifacts"
         required = ("configuration.json", "tokenizer.json", "tfidf_vectorizer.joblib",
@@ -65,6 +76,14 @@ def load_model_adapter(model_id: str) -> ModelAdapter:
         from models.yash_5th_place.adapter import YashFifthPlaceAdapter
 
         ModelRegistry.register(model_id, YashFifthPlaceAdapter)
+        adapter = ModelRegistry.get(model_id)()
+        if not getattr(adapter, "model_ready", False):
+            raise ModelNotAvailableError(adapter.unavailable_reason)
+        return adapter
+    if model_id == "aakash_7th_place":
+        from models.aakash_7th_place.adapter import AakashSeventhPlaceAdapter
+
+        ModelRegistry.register(model_id, AakashSeventhPlaceAdapter)
         adapter = ModelRegistry.get(model_id)()
         if not getattr(adapter, "model_ready", False):
             raise ModelNotAvailableError(adapter.unavailable_reason)

@@ -138,6 +138,29 @@ def test_model_availability_does_not_claim_missing_models_are_available(tmp_path
     assert "not available" in message
 
 
+def test_aakash_availability_requires_model_package_artifacts(tmp_path):
+    artifacts = tmp_path / "models" / "aakash_7th_place" / "artifacts"
+    artifacts.mkdir(parents=True)
+
+    available, message = model_availability("aakash_7th_place", tmp_path)
+    assert not available
+    assert "configuration.json" in message
+
+    for name in ("configuration.json", "tokenizer.json", "model.joblib"):
+        (artifacts / name).touch()
+    available, message = model_availability("aakash_7th_place", tmp_path)
+    assert available
+    assert "separate training split" in message
+
+
+def test_aakash_adapter_is_registered_for_live_predictions():
+    adapter = load_model_adapter("aakash_7th_place")
+    probabilities = adapter.predict_proba(["A short essay for a live model smoke test."])
+
+    assert probabilities.shape == (1,)
+    assert 0.0 <= probabilities[0] <= 1.0
+
+
 def test_aditya_adaptation_availability_requires_complete_artifact_set(tmp_path):
     artifacts = tmp_path / "models" / "aditya_3rd_place" / "artifacts"
     artifacts.mkdir(parents=True)

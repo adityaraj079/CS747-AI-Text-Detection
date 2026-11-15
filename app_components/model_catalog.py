@@ -55,11 +55,14 @@ MODEL_SPECS: dict[str, dict[str, Any]] = {
         "group": "team",
         "member": "Aakash Patil",
         "architecture": "BPE + TF-IDF with MultinomialNB and SGD ensemble.",
-        "version": "Reproduction package pending",
+        "version": "Adapted reproduction; frozen split not used",
         "reference": COMPETITION_URL,
         "reference_label": "Kaggle competition",
-        "availability": "Not integrated",
-        "status_detail": "Model artifacts and adapter are not present in the repository.",
+        "availability": "Adapted package",
+        "status_detail": (
+            "CPU inference adapter and fitted artifacts are available. The model used a separate "
+            "training split, so repository test scores are optimistic and not directly comparable."
+        ),
     },
     "aditya_3rd_place": {
         "name": "Aditya Raj — Submission #3 adaptation",
