@@ -18,8 +18,17 @@ from app_components.data_loader import (
     normalize_result_record,
 )
 from app_components.charts import generalization_gap_table, metric_comparison_figure
+from app_components.inference import threshold_decision
 from app_components.model_registry import MODEL_IDS, load_model_adapter, model_availability
 from evaluation.model_adapters import ModelNotAvailableError, require_probability_vector
+
+
+@pytest.mark.parametrize(
+    ("probability", "expected"),
+    [(0.5, "AI-generated"), (0.9, "AI-generated"), (0.499, "Not AI-generated")],
+)
+def test_threshold_decision_names_the_predicted_class(probability, expected):
+    assert threshold_decision(probability) == expected
 
 
 def test_loads_standardized_and_historical_results_with_cpu_aliases(tmp_path):

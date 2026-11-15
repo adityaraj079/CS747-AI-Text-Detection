@@ -19,8 +19,7 @@ def warm_predict(model: ModelAdapter, text: str) -> tuple[float, float]:
 
 
 def threshold_decision(probability: float, threshold: float = DISPLAY_THRESHOLD) -> str:
-    predicted_class = "AI-generated class" if probability >= threshold else "Human-written class"
-    return f"{predicted_class} at threshold {threshold:.2f}"
+    return "AI-generated" if probability >= threshold else "Not AI-generated"
 
 
 def show_live_predictions(
@@ -35,9 +34,8 @@ def show_live_predictions(
     st.subheader(section_title)
     st.caption(
         "Predictions are model probabilities, not ground-truth determinations. "
-        "Inference latency excludes adapter loading and includes the adapter's prediction call. "
-        "The 0.50 display threshold is provisional; official evaluation should use a threshold "
-        "selected from validation data."
+        "The classification uses a provisional 0.50 threshold; official evaluation should use "
+        "a threshold selected from validation data."
     )
     text = st.text_area(
         "Essay text",
@@ -59,8 +57,20 @@ def show_live_predictions(
         except (ImportError, FileNotFoundError, RuntimeError, ValueError) as exc:
             st.info(f"**{spec['short_name']} unavailable:** {exc}")
             continue
-        columns = st.columns([2, 1, 1])
+        columns = st.columns([2, 1, 1, 1])
         columns[0].markdown(f"**{spec['name']}**")
         columns[1].metric("P(AI-generated)", f"{probability:.3f}")
-        columns[2].metric("Warm latency", f"{latency_ms:.2f} ms")
-        st.caption(threshold_decision(probability))
+        columns[2].metric(
+            "Classification",
+            threshold_decision(probability),
+            help=f"AI-generated when P(AI-generated) >= {DISPLAY_THRESHOLD:.2f}; otherwise Not AI-generated.",
+        )
+        columns[3].metric(
+            "Detection time",
+            f"{latency_ms:.2f} ms",
+            help=(
+                "Time this model took to produce this prediction, measured after an untimed "
+                "warm-up call. Excludes model loading and warm-up; includes prediction and "
+                "output validation."
+            ),
+        )
