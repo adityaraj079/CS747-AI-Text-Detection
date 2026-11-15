@@ -18,6 +18,7 @@ from app_components.data_loader import (
     compare_results_compatibility,
     finite_metric,
     format_metric,
+    latest_result,
     partition_metadata,
 )
 from app_components.inference import show_live_predictions
@@ -143,12 +144,21 @@ def render_page(
         unsafe_allow_html=True,
     )
 
+    card_results = {
+        model_id: latest_result(
+            results,
+            model_id,
+            "standard_test",
+            "standardized",
+        )
+        for model_id in TEAM_MODEL_IDS
+    }
     card_columns = st.columns(2)
     for index, model_id in enumerate(TEAM_MODEL_IDS):
         with card_columns[index % 2]:
             render_model_card(
                 model_specs[model_id],
-                None,
+                card_results[model_id],
                 model_availability(model_id, root),
                 compact=True,
             )

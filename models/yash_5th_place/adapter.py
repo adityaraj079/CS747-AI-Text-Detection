@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import joblib
-import lightgbm as lgb
 import numpy as np
 from tokenizers import Tokenizer
 
@@ -36,6 +35,8 @@ class YashFifthPlaceAdapter(ModelAdapter):
         self.classifiers = joblib.load(self.artifact_dir / "classifiers.joblib")
         if len(self.classifiers) != 6:
             raise ValueError("Expected six repository-trained sklearn ensemble members")
+        import lightgbm as lgb
+
         self.booster = lgb.Booster(model_file=str(self.artifact_dir / "lightgbm.txt"))
         self.model_ready = True
 

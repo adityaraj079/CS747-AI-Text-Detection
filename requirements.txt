@@ -5,4 +5,5 @@ matplotlib>=3.8
 streamlit>=1.40
 plotly>=5.20
 catboost>=1.2
+lightgbm>=4.0
 tokenizers>=0.15
