@@ -1,0 +1,23 @@
+{
+  "model_id": "aakash_7th_place",
+  "team_member": "Aakash Patil",
+  "solution_name": "7th place, Efficiency Prize (davin11 / wcqyfly)",
+  "competition": "LLM - Detect AI Generated Text",
+  "competition_track": "Efficiency Prize",
+  "source_reference": "https://www.kaggle.com/code/wcqyfly/fork-of-fork-of-fork-of-llm-daigt-analyse-e-db6333",
+  "architecture": "Byte-level BPE + 3-5 gram TF-IDF + MultinomialNB and SGD (modified Huber) soft vote [0.43, 0.57]",
+  "label_orientation": "1 = AI-generated",
+  "inference_mode": "CPU-only",
+  "dependencies": "requirements.txt",
+  "training_data": "CS747data.csv, own stratified 80/10/10 split (seed 747); not the repository's frozen split",
+  "frozen_split_compliance": false,
+  "leakage_warning": "Most repository test/unseen_test essays were in this model's training data; standardized scores are optimistic.",
+  "original_submission_settings_verified": "Model definition and tokenizer/TF-IDF settings taken unchanged from the authors' code; training data and tokenizer-fit partition adapted.",
+  "original_leaderboard_score": null,
+  "artifacts": [
+    "artifacts/tokenizer.json",
+    "artifacts/model.joblib",
+    "artifacts/configuration.json"
+  ],
+  "integration_status": "Integrated; adapter registered in app_components/model_registry.py"
+}

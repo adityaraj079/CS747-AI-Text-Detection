@@ -1,0 +1,40 @@
+{
+  "model_id": "aakash_7th_place",
+  "member": "Aakash Patil",
+  "competition_track": "LLM - Detect AI Generated Text, Efficiency Prize (7th place solution by davin11/wcqyfly)",
+  "source_reference": "https://www.kaggle.com/code/wcqyfly/fork-of-fork-of-fork-of-llm-daigt-analyse-e-db6333",
+  "architecture": "Byte-level BPE (vocab 50275) + 3-5 token n-gram TF-IDF (sublinear tf) + MultinomialNB(alpha=0.0225) and SGDClassifier(modified_huber) soft vote, weights [0.43, 0.57]",
+  "adaptation_status": "Original model definition (model_ensemble.py) and tokenizer/TF-IDF settings used unchanged; data, split, and tokenizer-fit partition adapted (see adaptations). Not the original competition submission.",
+  "adaptations": [
+    "Trained on CS747data.csv instead of the competition's DAIGT/argugpt/commonlit sources.",
+    "Own stratified 80/10/10 split (seed 747) after dropping essays < 50 chars, exact normalized duplicates and conflicting labels; NOT the repository's frozen 70/15/15 + unseen-source split.",
+    "BPE tokenizer and TF-IDF vocabulary fit on the own-split validation essays (original: on the competition test essays); IDF fit on the own-split training essays.",
+    "SGD trained epoch by epoch with partial_fit and fit()'s stopping rule (tol 1e-4, n_iter_no_change 5); stopped after 6 epochs."
+  ],
+  "frozen_split_compliance": false,
+  "leakage_warning": "The own 80/10/10 split draws ~80% of every source into training, including the sources the repository reserves for unseen_test. Most repository test/unseen_test essays were therefore seen during training; standardized evaluator scores for this model are optimistic and not comparable with frozen-split models.",
+  "training_seed": 747,
+  "local_dataframe_hash": "ffb06f7e6ab92b0746c797d1d659155a85d7e15d779359c2cf73d55cc5f1fbc1",
+  "own_split_counts": {"train": 123661, "validation": 15458, "test": 15458},
+  "tokenizer_fit_partition": "own-split validation",
+  "vocabulary_fit_partition": "own-split validation (min_df=2)",
+  "tfidf_idf_fit_partition": "own-split train",
+  "tfidf_features": 1537124,
+  "ensemble_weights": [0.43, 0.57],
+  "validation_selected_threshold": 0.32,
+  "sgd_epochs": 6,
+  "own_split_metrics_note": "Measured on the own-split test set (15458 essays), not the repository's frozen split.",
+  "own_split_metrics": {
+    "roc_auc_ensemble": 0.9996160114608055,
+    "roc_auc_mnb": 0.9990913612859808,
+    "roc_auc_sgd": 0.9996152815635116,
+    "validation_roc_auc_ensemble": 0.9994895410030037,
+    "accuracy_at_0.5": 0.9862854185534998,
+    "accuracy_at_val_threshold_0.32": 0.9948246862466037
+  },
+  "training_dependencies": {"python": "3.11.9", "numpy": "1.26.4", "pandas": "2.2.0", "joblib": "1.6.0", "scikit_learn": "1.2.2", "tokenizers": "0.15.1"},
+  "artifact_format": "Plain numpy arrays + dict (no sklearn objects), exported from run_7th.py's pipeline.joblib by export_artifacts.py; MultinomialNB.feature_count_ dropped (unused at inference).",
+  "artifact_paths": ["artifacts/tokenizer.json", "artifacts/model.joblib"],
+  "cpu_compatible": true,
+  "license_and_redistribution": "Original code MIT (Copyright (c) 2024 davin11, see original_solution/LICENSE). Model owner states written rights cover all source datasets and model artifacts."
+}
