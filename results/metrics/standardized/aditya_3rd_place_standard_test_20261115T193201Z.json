@@ -1,0 +1,51 @@
+{
+  "result_category": "standardized",
+  "model_id": "aditya_3rd_place",
+  "dataset_hash": "e6f09bceef8d6bd2334034ebcd0cc85f388e116f5abe9d9983d4037f6b611982",
+  "split_id": "55f6121fcd64862475926d8340f20f3aaba75071442241bb71b03526adcb66c0",
+  "dataset_type": "standard_test",
+  "record_count": 18478,
+  "threshold": 0.5,
+  "timestamp": "2026-11-15T19:32:01.358389+00:00",
+  "software": {
+    "python": "3.10.18",
+    "numpy": "2.2.6",
+    "pandas": "2.3.3",
+    "scikit_learn": "1.7.2"
+  },
+  "benchmark": {
+    "batch_size": 256,
+    "warmup_steps": 3,
+    "repeats": 5,
+    "median_elapsed_seconds": 0.1451952499919571,
+    "milliseconds_per_essay": 0.5671689452810824,
+    "throughput_essays_per_second": 1763.1430781253573,
+    "peak_ram_mb": 548.59375,
+    "cpu_model": "arm",
+    "system_info": "macOS-15.7.8-arm64-arm-64bit",
+    "python_version": "3.10.18",
+    "thread_count": 10
+  },
+  "roc_auc": 0.9995424078332555,
+  "accuracy": 0.9939387379586535,
+  "precision": 0.9960496613995485,
+  "recall": 0.9969248148613029,
+  "f1": 0.9964870459820588,
+  "confusion_matrix": [
+    [
+      2481,
+      63
+    ],
+    [
+      49,
+      15885
+    ]
+  ],
+  "latency_ms_per_essay": 0.5671689452810824,
+  "throughput": 1763.1430781253573,
+  "cpu_model": "arm",
+  "thread_count": 10,
+  "batch_size": 256,
+  "peak_ram_mb": 548.59375,
+  "model_size_mb": 2.309429168701172
+}

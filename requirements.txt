@@ -4,6 +4,7 @@ scikit-learn>=1.4
 matplotlib>=3.8
 streamlit>=1.40
 plotly>=5.20
+psutil>=5.9
 catboost>=1.2
 lightgbm>=4.0
 tokenizers>=0.15

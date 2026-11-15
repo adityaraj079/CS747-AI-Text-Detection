@@ -24,4 +24,7 @@ Each standardized metric record should include:
 - `cpu_model`, `thread_count`, `batch_size`
 - `record_count`, `threshold`, `timestamp`
 
+`peak_ram_mb` is sampled process RSS during one warmed inference batch. It
+includes the loaded model and benchmark process, and is not training memory.
+
 Missing values should be omitted or null; never write placeholder scores. `results/metrics/historical/` is the import location for old notebook summaries. The dashboard labels these as historical and checks dataset/hardware compatibility before showing deltas or conclusions.

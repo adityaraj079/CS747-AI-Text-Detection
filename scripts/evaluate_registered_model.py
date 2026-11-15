@@ -137,6 +137,7 @@ def evaluate(args: argparse.Namespace) -> Path:
             "cpu_model": benchmark["cpu_model"],
             "thread_count": benchmark["thread_count"],
             "batch_size": benchmark["batch_size"],
+            "peak_ram_mb": benchmark["peak_ram_mb"],
             "model_size_mb": _artifact_size_mb(args.model_id),
         }
     )
