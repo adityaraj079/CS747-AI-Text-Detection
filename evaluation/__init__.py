@@ -11,5 +11,6 @@ __all__ = [
     'compute_metrics',
     'serialize_metrics',
     'ModelAdapter',
+    'ModelNotAvailableError',
     'ModelRegistry',
 ]

@@ -8,8 +8,8 @@ This folder contains the processed CS747 dataset, metadata manifests, generated 
 - Accepted records after validation and deduplication: 154582
 - Removed records: 10504
 - Sources retained: 24
-- Human-written essays: 43312
-- AI-generated essays: 121774
+- Human-written essays: 42955
+- AI-generated essays: 111627
 
 ## Data-quality findings
 
@@ -19,9 +19,9 @@ This folder contains the processed CS747 dataset, metadata manifests, generated 
 - Conflicting-label records quarantined: 2
 - Dataset hash: `e6f09bceef8d6bd2334034ebcd0cc85f388e116f5abe9d9983d4037f6b611982`
 
-## Standard experimental split
+## Experimental split
 
-The accepted dataset is partitioned into train, validation, and standard test as 70/15/15 using seed 747.
+The source-held-out unseen test is reserved first. The remaining standard pool (123182 records) is split into train, validation, and standard test as 70/15/15 using seed 747. The percentages in the figure are each partition's share of all 154582 accepted records.
 
 - Train: 86227
 - Validation: 18477

@@ -29,15 +29,15 @@ def load_split_data():
 
 def build_figures():
     splits = load_split_data()
-    manifest = json.loads((MANIFESTS / 'split_manifest.json').read_text())
     quality = json.loads((MANIFESTS / 'data_quality_report.json').read_text())
-    source_counts = pd.concat([df[['source', 'labels']] for df in splits.values()], ignore_index=True).groupby('source').size().sort_values(ascending=False)
-    accepted_rows = sum(manifest.get('split_counts', {}).values())
+    all_frames = pd.concat([df.assign(split=name) for name, df in splits.items()], ignore_index=True)
+    accepted_rows = len(all_frames)
     original_rows = int(quality.get('original_row_count', 0))
-    duplicate_rows = int(quality.get('normalized_duplicate_rows', 0)) + int(quality.get('conflicting_label_rows', 0)) + int(quality.get('missing_empty_text_rows', 0))
-    source_count = len(quality.get('source_distribution', {}))
-    human_total = int(quality.get('class_distribution', {}).get('0', 0))
-    ai_total = int(quality.get('class_distribution', {}).get('1', 0))
+    excluded_rows = original_rows - accepted_rows
+    source_count = int(all_frames['source'].nunique())
+    human_total = int(all_frames['labels'].eq(0).sum())
+    ai_total = int(all_frames['labels'].eq(1).sum())
+    standard_pool_rows = len(splits['train']) + len(splits['validation']) + len(splits['test'])
 
     # Figure 1: split distribution
     counts = [len(splits.get('train', [])), len(splits.get('validation', [])), len(splits.get('test', [])), len(splits.get('unseen_test', [])) if 'unseen_test' in splits else 0]
@@ -47,36 +47,88 @@ def build_figures():
     fig, ax = plt.subplots(figsize=(8, 5))
     bars = ax.bar(labels, counts, color=['#2E86AB', '#A23B72', '#F18F01', '#4C956C'])
     ax.set_ylabel('Essay count')
-    ax.set_title('Dataset split distribution')
+    ax.set_title('Dataset splits (percentages of all accepted records)')
     for rect, pct in zip(bars, percentages):
         h = rect.get_height()
-        ax.text(rect.get_x() + rect.get_width()/2.0, h + 2, f"{int(h)}\n({pct:.1f}%)", ha='center', va='bottom', fontsize=9)
+        ax.text(rect.get_x() + rect.get_width()/2.0, h + 2, f"{int(h):,}\n({pct:.1f}%)", ha='center', va='bottom', fontsize=9)
     fig.tight_layout()
     fig.savefig(FIG_DIR / 'dataset_split_distribution.png', dpi=300)
     plt.close(fig)
 
     # Figure 2: class distribution
-    all_frames = pd.concat([df.assign(split=name) for name, df in splits.items()], ignore_index=True)
     class_summary = all_frames.groupby(['split', 'labels']).size().unstack(fill_value=0)
     class_summary = class_summary.reindex(['train', 'validation', 'test'] + (['unseen_test'] if 'unseen_test' in splits else []), fill_value=0)
+    class_summary = class_summary.reindex(columns=[0, 1], fill_value=0)
     fig, ax = plt.subplots(figsize=(8, 5))
-    class_summary.plot(kind='bar', stacked=True, ax=ax, color=['#7EBDC2', '#E76F51'])
-    ax.set_title('Human vs AI class balance across partitions')
+    x_values = list(range(len(class_summary)))
+    totals = class_summary.sum(axis=1)
+    bottoms = [0.0] * len(class_summary)
+    colors = {0: '#287D83', 1: '#D46A4C'}
+    for label in (0, 1):
+        values = class_summary[label].tolist()
+        percentages = [
+            (value / int(totals.iloc[index]) * 100) if totals.iloc[index] else 0
+            for index, value in enumerate(values)
+        ]
+        bars = ax.bar(x_values, percentages, bottom=bottoms, label=f'Label {label}', color=colors[label])
+        for index, (bar, value, percentage) in enumerate(zip(bars, values, percentages)):
+            if value:
+                ax.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    bottoms[index] + percentage / 2,
+                    f'{value:,}\n({percentage:.1f}%)',
+                    ha='center',
+                    va='center',
+                    color='white',
+                    fontsize=8,
+                )
+        bottoms = [bottoms[index] + percentages[index] for index in range(len(values))]
+    for index, total_count in enumerate(totals):
+        ax.text(x_values[index], 103, f'n={total_count:,}', ha='center', va='bottom', fontsize=8)
+    ax.set_xticks(x_values, class_summary.index)
+    ax.set_ylim(0, 112)
+    ax.set_yticks(range(0, 101, 20))
+    ax.set_title('Class proportions across partitions')
     ax.set_xlabel('Split')
-    ax.set_ylabel('Essay count')
-    ax.legend(['Human (0)', 'AI (1)'])
+    ax.set_ylabel('Share of essays (%)')
+    ax.legend(['Human-written (0)', 'AI-generated (1)'])
     fig.tight_layout()
     fig.savefig(FIG_DIR / 'class_distribution.png', dpi=300)
     plt.close(fig)
 
     # Figure 3: source composition
-    source_df = all_frames.groupby('source').size().sort_values(ascending=False).head(15).reset_index()
-    source_df.columns = ['source', 'count']
+    source_totals = all_frames.groupby('source').size().sort_values(ascending=False)
+    top_sources = set(source_totals.head(15).index)
+    source_plot = all_frames[['source', 'labels']].copy()
+    source_plot['source_group'] = source_plot['source'].where(source_plot['source'].isin(top_sources), 'Other')
+    source_summary = source_plot.groupby(['source_group', 'labels']).size().unstack(fill_value=0)
+    source_summary = source_summary.reindex(columns=[0, 1], fill_value=0)
+    source_summary['total'] = source_summary.sum(axis=1)
+    source_summary = source_summary.sort_values('total')
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.barh(source_df['source'][::-1], source_df['count'][::-1], color='#5C7CFA')
-    ax.set_title('Top sources by essay count')
+    source_labels = source_summary.index.tolist()
+    positions = list(range(len(source_labels)))
+    left = [0] * len(source_labels)
+    for label, color, legend in ((0, '#287D83', 'Human (0)'), (1, '#D46A4C', 'AI (1)')):
+        values = source_summary[label].tolist()
+        bars = ax.barh(positions, values, left=left, color=color, label=legend)
+        for index, (bar, value) in enumerate(zip(bars, values)):
+            if value >= max(1, int(source_summary['total'].max() * 0.035)):
+                ax.text(
+                    left[index] + value / 2,
+                    bar.get_y() + bar.get_height() / 2,
+                    f'{value:,}',
+                    ha='center',
+                    va='center',
+                    color='white',
+                    fontsize=8,
+                )
+        left = [left[index] + values[index] for index in range(len(values))]
+    ax.set_yticks(positions, source_labels)
+    ax.set_title('Source composition by verified label')
     ax.set_xlabel('Essays')
     ax.set_ylabel('Source')
+    ax.legend()
     fig.tight_layout()
     fig.savefig(FIG_DIR / 'source_distribution.png', dpi=300)
     plt.close(fig)
@@ -100,21 +152,22 @@ def build_figures():
     ax = fig.add_axes([0.05, 0.05, 0.9, 0.9])
     ax.axis('off')
     boxes = [
-        ('Original CSV', (0.05, 0.82)),
-        ('Validation', (0.25, 0.82)),
-        ('Deduplication', (0.47, 0.82)),
-        ('Unseen source holdout', (0.68, 0.82)),
-        ('Train / Validation / Test', (0.15, 0.52)),
-        ('Evaluation datasets', (0.55, 0.52)),
+        (f'Original CSV\n{original_rows:,} rows', (0.14, 0.78)),
+        (f'Validated + deduplicated\n{accepted_rows:,} accepted', (0.50, 0.78)),
+        (f'Unseen source holdout\n{len(splits.get("unseen_test", [])):,} rows', (0.30, 0.40)),
+        (
+            f'Standard pool: {standard_pool_rows:,}\n'
+            f'Train {len(splits["train"]):,} | Val {len(splits["validation"]):,}\n'
+            f'Test {len(splits["test"]):,}',
+            (0.72, 0.40),
+        ),
     ]
     for label, (x, y) in boxes:
         ax.text(x, y, label, ha='center', va='center', bbox=dict(boxstyle='round,pad=0.4', facecolor='#DDEBF7', edgecolor='black'), fontsize=10)
-    ax.annotate('', xy=(0.2, 0.82), xytext=(0.15, 0.82), arrowprops=dict(arrowstyle='->'))
-    ax.annotate('', xy=(0.42, 0.82), xytext=(0.38, 0.82), arrowprops=dict(arrowstyle='->'))
-    ax.annotate('', xy=(0.63, 0.82), xytext=(0.56, 0.82), arrowprops=dict(arrowstyle='->'))
-    ax.annotate('', xy=(0.25, 0.52), xytext=(0.4, 0.82), arrowprops=dict(arrowstyle='->'))
-    ax.annotate('', xy=(0.65, 0.52), xytext=(0.72, 0.82), arrowprops=dict(arrowstyle='->'))
-    ax.text(0.5, 0.2, f'Accepted rows: {accepted_rows}', ha='center', fontsize=12)
+    ax.annotate('', xy=(0.38, 0.78), xytext=(0.25, 0.78), arrowprops=dict(arrowstyle='->'))
+    ax.annotate('', xy=(0.30, 0.49), xytext=(0.45, 0.69), arrowprops=dict(arrowstyle='->'))
+    ax.annotate('', xy=(0.72, 0.49), xytext=(0.55, 0.69), arrowprops=dict(arrowstyle='->'))
+    ax.text(0.5, 0.12, 'Evaluation: standard test + unseen test', ha='center', fontsize=11)
     fig.savefig(FIG_DIR / 'dataset_pipeline.png', dpi=300)
     plt.close(fig)
 
@@ -123,7 +176,7 @@ def build_figures():
     metrics = [
         ('Original essays', int(original_rows)),
         ('Accepted', int(accepted_rows)),
-        ('Removed duplicates', int(duplicate_rows)),
+        ('Excluded / quarantined', int(excluded_rows)),
         ('Sources', int(source_count)),
         ('Human', int(human_total)),
         ('AI', int(ai_total)),

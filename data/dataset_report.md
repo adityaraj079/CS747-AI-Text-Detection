@@ -25,18 +25,20 @@ The source dataset is read from the local CSV path provided for the project, wit
 
 ## Accepted data summary
 
-- Human-written essays: 43312
-- AI-generated essays: 121774
+- Human-written essays: 42955
+- AI-generated essays: 111627
 - Number of sources retained: 24
 
 ## Split summary
 
-| Partition | Count | Human | AI |
-| --- | ---: | ---: | ---: |
-| Train | 86227 | 11873 | 74354 |
-| Validation | 18477 | 2544 | 15933 |
-| Test | 18478 | 2544 | 15934 |
-| Unseen test | 31400 | 25994 | 5406 |
+The unseen-source holdout is set aside first. The remaining 123182 records are split 70/15/15 into train, validation, and standard test using seed 747. Partition percentages below are shares of the complete accepted dataset (154582 records).
+
+| Partition | Count | % of accepted | Human | AI |
+| --- | ---: | ---: | ---: | ---: |
+| Train | 86227 | 55.8% | 11873 | 74354 |
+| Validation | 18477 | 12.0% | 2544 | 15933 |
+| Test | 18478 | 12.0% | 2544 | 15934 |
+| Unseen test | 31400 | 20.3% | 25994 | 5406 |
 
 ## Unseen-source holdout
 

@@ -6,6 +6,10 @@ from typing import Dict, Type
 import numpy as np
 
 
+class ModelNotAvailableError(RuntimeError):
+    """Raised when a registered adapter lacks the implementation or fitted artifacts."""
+
+
 class ModelAdapter(ABC):
     """Base interface for all project-compatible model adapters."""
 

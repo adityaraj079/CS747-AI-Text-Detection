@@ -1,46 +1,27 @@
-# Model Packaging Prompt for Team Members
+# CS747 model integration prompt
 
-Copy and paste the following prompt into your coding agent.
+Copy this prompt into a coding agent when packaging an existing model. Use it for:
+
+- `models/kaggle_first_place/`
+- `models/yash_5th_place/`
+- `models/aakash_7th_place/`
+- `models/aditya_3rd_place/`
+- `models/daniel_bert/`
+- `models/custom_model/`
 
 ```text
-You are working inside the CS747 AI Text Detection project. Your job is to inspect an existing completed or near-complete model notebook and package it for compatibility with our shared evaluation framework.
+You are packaging an existing, completed model for the CS747 AI Text Detection dashboard. Inspect the existing notebook and local artifacts in the assigned model directory. Do not retrain, fine-tune, or rerun training unless I explicitly authorize it.
 
-Important constraints:
-- Do NOT retrain the model unless I explicitly ask for it.
-- Preserve the original inference pipeline and all fitted artifacts used at prediction time.
-- Do not modify or delete the original notebook unless it is required for a clear packaging step.
-- Keep the model compatible with CPU-only inference.
-- Avoid absolute paths or environment-specific assumptions.
-- Do not load arbitrary pickle/joblib files from untrusted sources.
-- The package must expose a `ModelAdapter` interface consistent with the shared evaluator.
+Scientific and safety constraints:
+- Preserve the original notebook and inference pipeline.
+- Do not invent model settings, leaderboard scores, provenance, predictions, or performance results.
+- Do not modify the frozen evaluation datasets, manifests, or another member's code.
+- Use only trusted, repository-owned model artifacts. Never load user-uploaded or arbitrary serialized files.
+- Use relative paths; support CPU inference where the model permits it.
+- Keep model-specific dependencies in this model directory's requirements.txt.
+- Do not determine a final test threshold or fit calibration on the final test set. Use the shared validation-selected threshold and calibration policy.
 
-Task:
-1. Inspect the existing notebook or model files in the current working directory.
-2. Identify all preprocessing steps, tokenizers, vectorizers, feature transformations, and encoders.
-3. Identify the trained classifier or neural weights used at inference time.
-4. Confirm the original inference pipeline and preserve it exactly as much as possible.
-5. Extract the reusable inference logic into a file named `adapter.py`.
-6. Implement a class or loader that can initialize the model from the repository artifacts saved alongside the notebook.
-7. Add a `predict_proba(self, texts: list[str]) -> np.ndarray` method that returns a 1D NumPy array of probabilities for `P(AI-generated)` for each essay.
-8. The returned array must:
-   - have length equal to the number of input texts
-   - have shape `(n_samples,)`
-   - contain float probabilities in `[0, 1]`
-   - have no NaN or infinite values
-   - use label orientation consistent with `1 = AI-generated`
-9. Create `config.json` with metadata such as model id, team member name, architecture, training notes, version, and dependencies.
-10. Add `requirements.txt` listing any model-specific dependencies and versions.
-11. Create a `tests/test_adapter.py` smoke test with a few sample strings to ensure the adapter runs on CPU and returns valid probability arrays.
-12. Add `artifacts/README.md` explaining what fitted assets are stored and how they are loaded.
-13. Document provenance and references to the original Kaggle solution or notebook.
-14. Document training data and known limitations.
-15. Do not modify evaluation datasets or general project data files.
-16. Do not hardcode absolute file paths; use relative paths inside the package.
-17. Ensure inference is safe on CPU only, with no GPU assumptions.
-18. Provide a README that explains how the packaged model integrates into the shared evaluator.
-19. Keep the original notebook intact, and do not rerun training unless I ask for it.
-
-Required package structure:
+Package the model using:
 
 member_model/
 ├── README.md
@@ -53,20 +34,19 @@ member_model/
 └── tests/
     └── test_adapter.py
 
-Required model interface:
-
-```python
-class ModelAdapter:
-    def predict_proba(self, texts: list[str]):
-        """
-        Return a 1D NumPy array of probabilities representing P(AI-generated) for each essay.
-        """
-        raise NotImplementedError
+Tasks:
+1. Inspect the notebook and existing files; identify preprocessing, tokenizers, vectorizers, feature extraction, classifiers, neural weights, calibration, and any ensemble logic.
+2. Verify which inference components and fitted artifacts actually exist. Document missing artifacts rather than creating substitutes.
+3. Extract the complete inference-only pipeline into adapter.py. Implement a class derived from evaluation.model_adapters.ModelAdapter.
+4. Implement predict_proba(texts: list[str]) returning a finite float NumPy array with shape (n_samples,), values in [0, 1], and orientation P(labels == 1), where 1 means AI-generated.
+5. Raise evaluation.model_adapters.ModelNotAvailableError when implementation or fitted artifacts are unavailable. Never return random, constant, or fabricated probabilities to imitate a working model.
+6. Add tests for empty input, valid output shape/range/orientation, and clear missing-artifact errors. Do not require large model files for basic package tests.
+7. Record verified metadata in config.json: model ID, member, competition track, source reference, architecture, dependencies, original training-data requirements, artifact paths, CPU compatibility, and integration status. Use null or explicit “unknown/not verified” values when facts are unavailable.
+8. Document provenance, licenses/redistribution limits, training data, known limitations, artifact locations, and how the adapter is used with the shared evaluator.
+9. Register the trusted adapter explicitly in app_components/model_registry.py. Do not add unrestricted model discovery, public artifact upload, or arbitrary pickle loading.
+10. Run focused tests and report exactly what passed. Do not report metrics unless generated by the shared evaluator from actual predictions.
 ```
 
-After packaging, explain how to hand the model to the shared evaluator and how it should be registered with the project evaluation contract.
+## Dashboard registration
 
-Do not determine the final threshold in the model itself. The shared evaluation framework will select or validate the threshold.
-
-Any probability calibration must be learned using only training/validation data, never on the final test dataset.
-```
+The dashboard allowlists model IDs in `app_components/model_registry.py`. After implementing and testing an adapter, add an explicit loader for that model ID and update its metadata in `app_components/model_catalog.py` or its verified `config.json`. A model is not considered evaluated until a result record is saved under `results/metrics/`.

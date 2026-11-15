@@ -1,0 +1,19 @@
+{
+  "model_id": "kaggle_first_place",
+  "competition": "LLM Detect AI Generated Text",
+  "competition_track": "Main competition private leaderboard",
+  "team_or_solution_name": "Not independently verified",
+  "published_solution_reference": "https://www.kaggle.com/competitions/llm-detect-ai-generated-text/writeups/comprehensive-1st-place-write-up",
+  "original_private_leaderboard_roc_auc": null,
+  "architecture_summary": "Not yet verified from the published write-up.",
+  "dependencies": [],
+  "original_training_data_requirements": "Not confirmed from source materials available in this repository.",
+  "publicly_released_code_available": null,
+  "fitted_artifacts_available": false,
+  "reproduction_status": "Not integrated",
+  "status_detail": "The original fitted artifacts and compatible inference implementation have not been supplied.",
+  "artifact_paths": [
+    "artifacts/"
+  ],
+  "inference_device": "CPU"
+}
