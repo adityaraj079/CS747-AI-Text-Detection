@@ -1,0 +1,23 @@
+{
+  "solution_name": "Comprehensive 1st Place Write-Up",
+  "team_members": [
+    "Udbhav Bamba",
+    "Raja Biswas",
+    "Nicholas Broad"
+  ],
+  "competition": "LLM - Detect AI Generated Text",
+  "track": "Main private leaderboard",
+  "historical_rank": 1,
+  "private_leaderboard_roc_auc": 0.987824,
+  "score_metric": "ROC-AUC",
+  "architecture_summary": "An ensemble combining Mistral-7B LoRA detection models, DeBERTa-v3 embedding and ranking components, a Ghostbuster-derived classifier, and additional ensemble approaches.",
+  "publication_date": "2024-02-04",
+  "source_urls": {
+    "first_place_writeup": "https://www.kaggle.com/competitions/llm-detect-ai-generated-text/writeups/comprehensive-1st-place-write-up",
+    "official_leaderboard": "https://www.kaggle.com/competitions/llm-detect-ai-generated-text/leaderboard",
+    "official_solution_repository": "https://github.com/rbiswasfc/llm-detect-ai"
+  },
+  "result_provenance": "Published historical competition score from the official final private leaderboard.",
+  "score_verification": "Official Kaggle leaderboard API response: private leaderboard rank 1, displayScore 0.987824.",
+  "availability_status": "Original fitted checkpoints unavailable/unverified"
+}
