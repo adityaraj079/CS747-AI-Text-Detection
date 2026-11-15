@@ -27,6 +27,22 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## Run or deploy the Streamlit app
+
+Run the current placeholder locally:
+
+```bash
+streamlit run app.py
+```
+
+To publish it with Streamlit Community Cloud:
+
+1. Push this repository to GitHub.
+2. In Streamlit Community Cloud, create an app from that repository and select the `main` branch and `app.py`.
+3. Deploy. The app installs dependencies from the root `requirements.txt`.
+
+The current app shows the project overview only; model integrations, prediction, and benchmark results are not available yet. Dataset CSVs are excluded by `.gitignore`; keep them out of the public GitHub repository unless redistribution is approved.
+
 ## Dataset preparation
 
 Use the original CSV supplied locally and run:
