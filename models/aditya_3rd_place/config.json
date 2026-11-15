@@ -1,19 +1,25 @@
 {
   "model_id": "aditya_submission3",
   "team_member": "Aditya Raj",
-  "solution_name": "Submission #3 replication",
+  "solution_name": "Submission #3 low-memory adaptation",
   "competition": "LLM Detect AI Generated Text",
-  "architecture": "BPE tokenizer + TF-IDF + linear/classifier ensemble adaptation",
+  "architecture": "BPE tokenizer + TF-IDF + SGD and CatBoost soft-voting adaptation",
   "source_notebook": "original_notebook.ipynb",
   "helper_module": "cs747_submission3.py",
   "label_orientation": "1 = AI-generated",
   "inference_mode": "CPU-only",
+  "configuration_mode": "low_memory",
+  "original_submission_settings_verified": false,
   "artifacts": [
-    "artifacts/bpe_tokenizer.json"
+    "artifacts/bpe_tokenizer.json",
+    "artifacts/tfidf_vectorizer.joblib",
+    "artifacts/sgd_classifier.joblib",
+    "artifacts/catboost_classifier.cbm",
+    "artifacts/configuration.json"
   ],
   "notes": [
     "The notebook is preserved as-is to document the original submission replication workflow.",
-    "The repository includes a tokenizer artifact; fitted vectorizer/classifier weights must be placed in artifacts/ before full inference is possible.",
-    "This package deliberately avoids fabricating model outputs or retraining any model."
+    "Fitted adaptation assets are trained on the frozen standard train partition; validation is used only for ensemble-weight selection.",
+    "Original submission hyperparameters and ensemble weights are unverified; this package labels its weights as an adaptation."
   ]
 }

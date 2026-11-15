@@ -1,16 +1,18 @@
-# Aditya Raj — 3rd-place efficiency solution
+# Aditya Raj — Submission #3 adaptation
 
-This directory packages the Submission #3 replication from the project notebook and helper module, adapted to the shared CS747 model-integration contract.
+This directory packages a runnable, low-memory adaptation of the Submission #3 workflow for the shared CS747 model-integration contract. It is not a verified reproduction of the original competition submission: its original hyperparameters and ensemble weights were not available.
 
 ## Source material
 
 - `original_notebook.ipynb`: the project notebook used for the original submission replication.
 - `cs747_submission3.py`: the helper module that exposes the picklable BPE tokenizer wrapper.
-- `artifacts/bpe_tokenizer.json`: the tokenizer artifact saved by the notebook.
+- `artifacts/`: fitted tokenizer, TF-IDF vectorizer, SGD classifier, CatBoost classifier, and training configuration.
 
 ## Model status
 
-This repository does not include a final fitted TF-IDF vectorizer or trained classifier artifact for the full Submission #3 model. The available project artifact is the tokenizer file only. The adapter is therefore structured to load the trained vectorizer and classifier when those artifacts are placed in `artifacts/`, without modifying the original notebook or retraining the model.
+The low-memory adaptation uses BPE tokenization, word-level TF-IDF with 3- and 4-grams, an SGD classifier, and a CatBoost classifier. The ensemble weight is selected by ROC-AUC on validation data. The saved configuration records the settings and source split fingerprints.
+
+The fit uses only `data/processed/train.csv`. `validation.csv` is used only to select the ensemble weight; standard test and unseen test are not used in fitting or selection. The result is a project-specific adaptation, not the original trained submission weights.
 
 ## Packaging contract
 
@@ -18,8 +20,10 @@ The shared project expects a `ModelAdapter` implementation with a `predict_proba
 
 ## Usage
 
-1. Place the fitted vectorizer and classifier artifacts in `artifacts/`.
-2. Keep the helper module and tokenizer artifact in the same directory.
-3. Use `adapter.py` with the shared evaluator.
+Recreate the artifacts locally with:
 
-The package intentionally does not fabricate model outputs or retrain any model.
+```bash
+python scripts/train_aditya_adaptation.py
+```
+
+Then evaluate against the frozen partitions with `scripts/evaluate_registered_model.py`. The processed CSVs remain local and ignored by Git; the fitted model artifacts are packaged for inference.

@@ -1,0 +1,80 @@
+{
+  "model_id": "aditya_3rd_place",
+  "name": "Submission #3 low-memory adaptation",
+  "label_orientation": "1 = AI-generated",
+  "training_scope": "frozen standard train partition only",
+  "blend_selection_scope": "frozen validation partition only",
+  "held_out_partitions_used_for_fitting": [],
+  "dataset_hash": "e6f09bceef8d6bd2334034ebcd0cc85f388e116f5abe9d9983d4037f6b611982",
+  "train_split_fingerprint": "d061b2abefb14bea38d3a9dfcdb98fcb8634bf749ef3a69b9071888757e80fc1",
+  "validation_split_fingerprint": "86882ce85873ede58dddf5e168385b59adf5245d81aa9ab454914735eb5af4c4",
+  "train_count": 86227,
+  "validation_count": 18477,
+  "configuration_mode": "low_memory",
+  "original_submission_settings_verified": false,
+  "seed": 747,
+  "tokenizer": {
+    "vocab_size": 16000,
+    "unk_token": "[UNK]",
+    "normalizer": "NFC",
+    "pre_tokenizer": "ByteLevel",
+    "add_prefix_space": false,
+    "special_tokens": [
+      "[UNK]"
+    ]
+  },
+  "tfidf": {
+    "ngram_range": [
+      3,
+      4
+    ],
+    "min_df": 3,
+    "max_features": 25000,
+    "lowercase": false,
+    "strip_accents": "unicode",
+    "sublinear_tf": true,
+    "dtype": "float32",
+    "analyzer": "word"
+  },
+  "sgd": {
+    "loss": "modified_huber",
+    "penalty": "l2",
+    "alpha": 0.0001,
+    "max_iter": 5000,
+    "tol": 0.0001,
+    "random_state": 747
+  },
+  "catboost": {
+    "iterations": 100,
+    "depth": 4,
+    "border_count": 32,
+    "learning_rate": 0.1,
+    "loss_function": "Logloss",
+    "eval_metric": "AUC",
+    "random_seed": 747,
+    "thread_count": 2,
+    "verbose": false,
+    "allow_writing_files": false
+  },
+  "ensemble_weight_step": 0.05,
+  "decision_threshold": 0.5,
+  "ensemble": {
+    "method": "validation ROC-AUC grid search in 0.05 increments",
+    "sgd_weight": 0.9500000000000001,
+    "catboost_weight": 0.04999999999999993,
+    "validation_roc_auc": 0.9994091808188929,
+    "source_verified": false
+  },
+  "software": {
+    "python": "3.10.18",
+    "scikit_learn": "1.7.2",
+    "catboost": "1.2.10",
+    "tokenizers": "0.23.3"
+  },
+  "artifact_sizes_bytes": {
+    "bpe_tokenizer.json": 1138763,
+    "tfidf_vectorizer.joblib": 547065,
+    "sgd_classifier.joblib": 92885,
+    "catboost_classifier.cbm": 640680
+  }
+}

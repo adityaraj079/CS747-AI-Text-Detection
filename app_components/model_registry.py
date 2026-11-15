@@ -20,20 +20,17 @@ def model_availability(model_id: str, repo_root: str | Path) -> tuple[bool, str]
         return False, "Not integrated: the original implementation and fitted artifacts are not available."
     if model_id == "aditya_3rd_place":
         artifacts = Path(repo_root) / "models" / model_id / "artifacts"
-        vectorizers = ("tfidf_vectorizer.joblib", "tfidf_vectorizer.pkl", "vectorizer.joblib", "vectorizer.pkl")
-        classifiers = (
-            "submission3_model.joblib",
-            "submission3_model.pkl",
-            "sgd_model.joblib",
-            "sgd_model.pkl",
-            "catboost_model.joblib",
-            "catboost_model.pkl",
+        required = (
+            "bpe_tokenizer.json",
+            "tfidf_vectorizer.joblib",
+            "sgd_classifier.joblib",
+            "catboost_classifier.cbm",
+            "configuration.json",
         )
-        if any((artifacts / name).is_file() for name in vectorizers) and any(
-            (artifacts / name).is_file() for name in classifiers
-        ):
-            return True, "Fitted artifact files detected; validate runtime loading before evaluation."
-        return False, "Artifacts incomplete: fitted vectorizer and classifier files are missing."
+        missing = [name for name in required if not (artifacts / name).is_file()]
+        if not missing:
+            return True, "Low-memory adaptation artifacts are present; original submission settings are unverified."
+        return False, "Adaptation artifacts are incomplete: " + ", ".join(missing)
     if model_id == "custom_model":
         return False, "Under development: no trained model package is registered."
     if model_id not in MODEL_IDS:
@@ -54,7 +51,7 @@ def load_model_adapter(model_id: str) -> ModelAdapter:
         ModelRegistry.register(model_id, AdityaSubmission3Adapter)
         adapter = ModelRegistry.get(model_id)()
         if not getattr(adapter, "model_ready", False):
-            raise ModelNotAvailableError("Aditya's fitted classifier artifacts are not available.")
+            raise ModelNotAvailableError(adapter.unavailable_reason)
         return adapter
     if model_id in MODEL_IDS:
         raise ModelNotAvailableError(

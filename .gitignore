@@ -34,6 +34,8 @@ data/**/*.csv
 *.pt
 *.ckpt
 *.onnx
+!models/aditya_3rd_place/artifacts/tfidf_vectorizer.joblib
+!models/aditya_3rd_place/artifacts/sgd_classifier.joblib
 
 # Keep tracked project outputs
 !data/processed/.gitkeep

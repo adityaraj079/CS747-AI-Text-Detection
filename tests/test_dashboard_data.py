@@ -129,6 +129,27 @@ def test_model_availability_does_not_claim_missing_models_are_available(tmp_path
     assert "not available" in message
 
 
+def test_aditya_adaptation_availability_requires_complete_artifact_set(tmp_path):
+    artifacts = tmp_path / "models" / "aditya_3rd_place" / "artifacts"
+    artifacts.mkdir(parents=True)
+    required = (
+        "bpe_tokenizer.json",
+        "tfidf_vectorizer.joblib",
+        "sgd_classifier.joblib",
+        "catboost_classifier.cbm",
+        "configuration.json",
+    )
+    available, message = model_availability("aditya_3rd_place", tmp_path)
+    assert not available
+    assert "bpe_tokenizer.json" in message
+
+    for name in required:
+        (artifacts / name).touch()
+    available, message = model_availability("aditya_3rd_place", tmp_path)
+    assert available
+    assert "original submission settings are unverified" in message
+
+
 def test_adapter_probabilities_are_validated():
     assert require_probability_vector([0.0, 0.75, 1.0], 3).tolist() == [0.0, 0.75, 1.0]
     with pytest.raises(ValueError, match="1D"):

@@ -42,7 +42,8 @@ def _arguments() -> argparse.Namespace:
 
 
 def _load_partition(data_dir: Path, dataset_type: str) -> tuple[pd.DataFrame, dict[str, Any], str]:
-    split_path = data_dir / "processed" / f"{dataset_type}.csv"
+    split_name = "test" if dataset_type == "standard_test" else dataset_type
+    split_path = data_dir / "processed" / f"{split_name}.csv"
     manifest_path = data_dir / "manifests" / "split_manifest.json"
     if not split_path.is_file():
         raise FileNotFoundError(f"Frozen evaluation partition not found: {split_path}")
@@ -61,13 +62,13 @@ def _load_partition(data_dir: Path, dataset_type: str) -> tuple[pd.DataFrame, di
     labels = pd.to_numeric(frame["labels"], errors="coerce")
     if labels.isna().any() or not labels.isin([0, 1]).all() or labels.nunique() != 2:
         raise ValueError("The evaluation partition must contain both binary labels 0 and 1.")
-    split_id = manifest.get("split_fingerprints", {}).get(dataset_type)
-    expected_count = manifest.get("split_counts", {}).get(dataset_type)
+    split_id = manifest.get("split_fingerprints", {}).get(split_name)
+    expected_count = manifest.get("split_counts", {}).get(split_name)
     if not split_id:
-        raise ValueError(f"Manifest does not contain a fingerprint for {dataset_type}.")
+        raise ValueError(f"Manifest does not contain a fingerprint for {split_name}.")
     if expected_count is not None and int(expected_count) != len(frame):
         raise ValueError(
-            f"Record count mismatch for {dataset_type}: manifest={expected_count}, file={len(frame)}."
+            f"Record count mismatch for {split_name}: manifest={expected_count}, file={len(frame)}."
         )
     frame = frame.copy()
     frame["labels"] = labels.astype(int)

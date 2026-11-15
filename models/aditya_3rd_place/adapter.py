@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -12,96 +13,95 @@ MODEL_DIR = Path(__file__).resolve().parent
 if str(MODEL_DIR) not in sys.path:
     sys.path.insert(0, str(MODEL_DIR))
 
+from cs747_submission3 import BPEWordTokenizer
 from evaluation.model_adapters import ModelAdapter, require_probability_vector
 
 
 class AdityaSubmission3Adapter(ModelAdapter):
-    """Adapter for Aditya Raj's Submission #3 replication.
-
-    The project archive contains the submission notebook and the BPE tokenizer
-    artifact, but not the fitted TF-IDF vectorizer/classifier objects. When the
-    full trained artifacts are present under this folder's `artifacts/` directory,
-    this adapter loads and executes them; otherwise it raises a clear error
-    instead of fabricating probabilities.
-    """
+    """Run the packaged low-memory Submission #3 adaptation ensemble."""
 
     def __init__(self, artifact_dir: str | Path | None = None):
-        self.root_dir = Path(__file__).resolve().parent
-        self.artifact_dir = Path(artifact_dir) if artifact_dir is not None else self.root_dir / 'artifacts'
+        self.root_dir = MODEL_DIR
+        self.artifact_dir = Path(artifact_dir) if artifact_dir is not None else MODEL_DIR / "artifacts"
+        self.model_ready = False
+        self.unavailable_reason = ""
         self.tokenizer = None
         self.vectorizer = None
-        self.model = None
-        self.model_ready = False
-        self._load_optional_artifacts()
+        self.sgd_model = None
+        self.catboost_model = None
+        self.sgd_weight = 0.5
+        self.catboost_weight = 0.5
+        self._load_artifacts()
 
-    def _load_optional_artifacts(self):
-        tokenizer_path = self.artifact_dir / 'bpe_tokenizer.json'
-        if tokenizer_path.exists():
-            try:
-                from tokenizers import Tokenizer
-                self.tokenizer = Tokenizer.from_file(str(tokenizer_path))
-            except Exception:
-                self.tokenizer = None
-
-        vectorizer_candidates = [
-            self.artifact_dir / 'tfidf_vectorizer.joblib',
-            self.artifact_dir / 'tfidf_vectorizer.pkl',
-            self.artifact_dir / 'vectorizer.joblib',
-            self.artifact_dir / 'vectorizer.pkl',
-        ]
-        classifier_candidates = [
-            self.artifact_dir / 'submission3_model.joblib',
-            self.artifact_dir / 'submission3_model.pkl',
-            self.artifact_dir / 'sgd_model.joblib',
-            self.artifact_dir / 'sgd_model.pkl',
-            self.artifact_dir / 'catboost_model.joblib',
-            self.artifact_dir / 'catboost_model.pkl',
-        ]
-
-        vectorizer_path = next((p for p in vectorizer_candidates if p.exists()), None)
-        classifier_path = next((p for p in classifier_candidates if p.exists()), None)
-        if vectorizer_path is None or classifier_path is None:
-            self.model_ready = False
+    def _load_artifacts(self) -> None:
+        artifact_names = (
+            "bpe_tokenizer.json",
+            "tfidf_vectorizer.joblib",
+            "sgd_classifier.joblib",
+            "catboost_classifier.cbm",
+            "configuration.json",
+        )
+        missing = [name for name in artifact_names if not (self.artifact_dir / name).is_file()]
+        if missing:
+            self.unavailable_reason = (
+                "Missing fitted adaptation artifacts: " + ", ".join(missing)
+            )
             return
 
-        try:
-            import joblib
-            self.vectorizer = joblib.load(vectorizer_path)
-            self.model = joblib.load(classifier_path)
-            self.model_ready = True
-        except Exception:
-            self.model_ready = False
+        import joblib
+        from catboost import CatBoostClassifier
+        from tokenizers import Tokenizer
 
-    def _tokenize(self, text: str) -> list[str]:
-        if self.tokenizer is None:
-            return text.split()
-        try:
-            from cs747_submission3 import BPEWordTokenizer
-            return BPEWordTokenizer(self.tokenizer)(text)
-        except Exception:
-            return text.split()
+        with (self.artifact_dir / "configuration.json").open(encoding="utf-8") as file:
+            configuration = json.load(file)
+        ensemble = configuration.get("ensemble", {})
+        sgd_weight = ensemble.get("sgd_weight")
+        catboost_weight = ensemble.get("catboost_weight")
+        if (
+            not isinstance(sgd_weight, (int, float))
+            or not isinstance(catboost_weight, (int, float))
+            or not np.isfinite(sgd_weight)
+            or not np.isfinite(catboost_weight)
+            or not np.isclose(sgd_weight + catboost_weight, 1.0)
+            or not 0 <= sgd_weight <= 1
+            or not 0 <= catboost_weight <= 1
+        ):
+            raise ValueError("The saved ensemble weights must be finite probabilities summing to one.")
 
-    def predict_proba(self, texts: list[str]):
+        self.tokenizer = Tokenizer.from_file(str(self.artifact_dir / "bpe_tokenizer.json"))
+        self.vectorizer = joblib.load(self.artifact_dir / "tfidf_vectorizer.joblib")
+        self.vectorizer.tokenizer = BPEWordTokenizer(self.tokenizer)
+        self.sgd_model = joblib.load(self.artifact_dir / "sgd_classifier.joblib")
+        self.catboost_model = CatBoostClassifier()
+        self.catboost_model.load_model(str(self.artifact_dir / "catboost_classifier.cbm"))
+        self.sgd_weight = float(sgd_weight)
+        self.catboost_weight = float(catboost_weight)
+        self.model_ready = True
+
+    @staticmethod
+    def _positive_class_probability(model, features) -> np.ndarray:
+        positive_indices = np.flatnonzero(np.asarray(model.classes_) == 1)
+        if positive_indices.size != 1:
+            raise ValueError("The fitted model must expose exactly one positive class labeled 1.")
+        return np.asarray(model.predict_proba(features)[:, int(positive_indices[0])], dtype=float)
+
+    def predict_proba(self, texts: list[str]) -> np.ndarray:
         texts = list(texts)
         if not texts:
             return np.asarray([], dtype=np.float64)
         if not self.model_ready:
-            raise FileNotFoundError(
-                'No fitted Submission #3 vectorizer/classifier artifacts were found in '
-                f'{self.artifact_dir}. Place the trained vectorizer and model files there '
-                'before running inference.'
-            )
+            raise FileNotFoundError(self.unavailable_reason)
 
-        transformed = self.vectorizer.transform([
-            ' '.join(self._tokenize(text)) for text in texts
-        ])
-        probs = self.model.predict_proba(transformed)
-        if probs.ndim == 2 and probs.shape[1] == 2:
-            probs = probs[:, 1]
-        probs = np.asarray(probs, dtype=float)
-        return require_probability_vector(probs, len(texts))
+        features = self.vectorizer.transform(texts)
+        sgd_probabilities = self._positive_class_probability(self.sgd_model, features)
+        catboost_probabilities = self._positive_class_probability(self.catboost_model, features)
+        probabilities = (
+            self.sgd_weight * sgd_probabilities
+            + self.catboost_weight * catboost_probabilities
+        )
+        return require_probability_vector(probabilities, len(texts))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     adapter = AdityaSubmission3Adapter()
-    print('Model ready:', adapter.model_ready)
+    print("Model ready:", adapter.model_ready)

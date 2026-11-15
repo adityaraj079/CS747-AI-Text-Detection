@@ -41,7 +41,7 @@ To publish it with Streamlit Community Cloud:
 2. In Streamlit Community Cloud, create an app from that repository and select the `main` branch and `app.py`.
 3. Deploy. The app installs dependencies from the root `requirements.txt`.
 
-The dashboard has exactly two views: **Kaggle Champion vs. Our Custom Model** and **Team Model Comparison**. It is presentation-first and reads saved result files only. The Kaggle first-place and team adapters remain unavailable until their verified inference packages and fitted artifacts are integrated. The app does not load or expose essay CSVs on Streamlit Community Cloud.
+The dashboard has exactly two views: **Kaggle Champion vs. Our Custom Model** and **Team Model Comparison**. It reads saved result files and loads registered inference adapters only when requested. Aditya's low-memory Submission #3 adaptation is packaged for inference; its weights are not a verified reproduction of the original competition submission. The Kaggle first-place and other team adapters remain unavailable until their verified inference packages and fitted artifacts are integrated. The app does not load or expose essay CSVs on Streamlit Community Cloud.
 
 Dataset CSVs are excluded by `.gitignore`; keep them out of the public GitHub repository unless redistribution is approved.
 
@@ -72,14 +72,20 @@ Each member should package a model using `models/model-prompt.md` and the adapte
 
 The dashboard reads small JSON or CSV result records from `results/metrics/standardized/` and `results/metrics/historical/`. Set `CS747_RESULTS_DIR` to import another trusted result directory. Standardized comparisons require matching dataset hash, split ID, and dataset type; CPU comparisons additionally require matching CPU and thread settings. Historical results are visibly labeled and never silently treated as a controlled comparison.
 
-After a model adapter and fitted artifacts are available, run a standardized evaluation locally:
+Aditya's adaptation is trained only from the frozen standard train partition. Recreate it locally with:
+
+```bash
+python scripts/train_aditya_adaptation.py
+```
+
+After an adapter and fitted artifacts are available, run a standardized evaluation locally:
 
 ```bash
 python scripts/evaluate_registered_model.py --model-id aditya_3rd_place --dataset-type standard_test
 python scripts/evaluate_registered_model.py --model-id aditya_3rd_place --dataset-type unseen_test
 ```
 
-The script uses the frozen local CSVs, shared evaluator, and CPU benchmark, then writes a timestamped result under `results/metrics/standardized/`. It does not train a model. These commands currently stop with a clear unavailable-model error until the fitted classifier artifacts are supplied. The Streamlit Cloud app remains in presentation mode because essay CSVs and model weights are intentionally not committed.
+The script uses the frozen local CSVs, shared evaluator, and CPU benchmark, then writes a timestamped result under `results/metrics/standardized/`. It does not train a model. Processed essay CSVs remain local and ignored by Git; the fitted adaptation artifacts are committed for inference.
 
 ## Notes
 
