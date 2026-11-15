@@ -72,11 +72,7 @@ Each member should package a model using `models/model-prompt.md` and the adapte
 
 The dashboard reads small JSON or CSV result records from `results/metrics/standardized/` and `results/metrics/historical/`. Set `CS747_RESULTS_DIR` to import another trusted result directory. Standardized comparisons require matching dataset hash, split ID, and dataset type; CPU comparisons additionally require matching CPU and thread settings. Historical results are visibly labeled and never silently treated as a controlled comparison.
 
-Aditya's adaptation is trained only from the frozen standard train partition. Recreate it locally with:
-
-```bash
-python scripts/train_aditya_adaptation.py
-```
+Aditya's adaptation was trained only from the frozen standard train partition. Team members preparing other models should follow `models/model-prompt.md`, which requires the same frozen train/validation/test protocol and explains how to package final artifacts.
 
 After an adapter and fitted artifacts are available, run a standardized evaluation locally:
 
@@ -89,6 +85,6 @@ The script uses the frozen local CSVs, shared evaluator, and CPU benchmark, then
 
 ## Notes
 
-- No model training is performed in this phase.
+- The dashboard does not train models at startup; team training and packaging follow `models/model-prompt.md`.
 - The dataset is validated before splitting.
 - The unseen evaluation set is derived from defensible source-family holdout groups, not arbitrary labels.

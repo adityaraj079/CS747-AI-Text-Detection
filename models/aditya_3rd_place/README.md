@@ -20,10 +20,4 @@ The shared project expects a `ModelAdapter` implementation with a `predict_proba
 
 ## Usage
 
-Recreate the artifacts locally with:
-
-```bash
-python scripts/train_aditya_adaptation.py
-```
-
-Then evaluate against the frozen partitions with `scripts/evaluate_registered_model.py`. The processed CSVs remain local and ignored by Git; the fitted model artifacts are packaged for inference.
+The checked-in configuration records the training settings and frozen split fingerprints. Follow `models/model-prompt.md` for the shared training and artifact-packaging contract. Evaluate the packaged model against the frozen partitions with `scripts/evaluate_registered_model.py`. The processed CSVs remain local and ignored by Git; only the fitted inference artifacts are packaged.

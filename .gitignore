@@ -32,10 +32,31 @@ data/**/*.csv
 *.h5
 *.bin
 *.pt
+*.pth
 *.ckpt
 *.onnx
-!models/aditya_3rd_place/artifacts/tfidf_vectorizer.joblib
-!models/aditya_3rd_place/artifacts/sgd_classifier.joblib
+*.cbm
+*.safetensors
+*.npz
+*.cbsnapshot
+!models/*/artifacts/*.pkl
+!models/*/artifacts/*.joblib
+!models/*/artifacts/*.h5
+!models/*/artifacts/*.bin
+!models/*/artifacts/*.pt
+!models/*/artifacts/*.pth
+!models/*/artifacts/*.ckpt
+!models/*/artifacts/*.onnx
+!models/*/artifacts/*.cbm
+!models/*/artifacts/*.safetensors
+models/*/artifacts/*.tmp
+models/*/artifacts/*.tmp.*
+models/*/artifacts/*.log
+models/*/artifacts/*.csv
+models/*/artifacts/*.npz
+models/*/artifacts/*.cbsnapshot
+models/*/artifacts/*checkpoint*
+models/*/artifacts/*cache*
 
 # Keep tracked project outputs
 !data/processed/.gitkeep
