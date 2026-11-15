@@ -1,0 +1,26 @@
+{
+  "ai_count": 5406,
+  "class_distribution": {
+    "0": 25994,
+    "1": 5406
+  },
+  "exclusion_rules": [
+    "Hold out all source families explicitly identified as Mistral7B-CME variants.",
+    "Hold out the human source persuade_2.0_human_scores_demo_id_github to preserve a class-balanced OOD evaluation set.",
+    "Remove all selected holdout sources from the standard 70/15/15 split."
+  ],
+  "held_out_sources": [
+    "Mistral7B-CME-v1",
+    "Mistral7B-CME-v2",
+    "Mistral7B-CME-v3",
+    "Mistral7B-CME-v4",
+    "Mistral7B-CME-v5",
+    "Mistral7B-CME-v6",
+    "Mistral7B-CME-v7",
+    "Mistral7B-CME-v7-15-percent-corruption",
+    "persuade_2.0_human_scores_demo_id_github"
+  ],
+  "human_count": 25994,
+  "record_count": 31400,
+  "selection_strategy": "source_family_holdout"
+}

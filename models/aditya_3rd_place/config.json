@@ -1,0 +1,19 @@
+{
+  "model_id": "aditya_submission3",
+  "team_member": "Aditya Raj",
+  "solution_name": "Submission #3 replication",
+  "competition": "LLM Detect AI Generated Text",
+  "architecture": "BPE tokenizer + TF-IDF + linear/classifier ensemble adaptation",
+  "source_notebook": "original_notebook.ipynb",
+  "helper_module": "cs747_submission3.py",
+  "label_orientation": "1 = AI-generated",
+  "inference_mode": "CPU-only",
+  "artifacts": [
+    "artifacts/bpe_tokenizer.json"
+  ],
+  "notes": [
+    "The notebook is preserved as-is to document the original submission replication workflow.",
+    "The repository includes a tokenizer artifact; fitted vectorizer/classifier weights must be placed in artifacts/ before full inference is possible.",
+    "This package deliberately avoids fabricating model outputs or retraining any model."
+  ]
+}

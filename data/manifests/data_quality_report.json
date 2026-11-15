@@ -1,0 +1,218 @@
+{
+  "character_count_summary": {
+    "max": 20459,
+    "mean": 1876.4509528367032,
+    "median": 1584.0,
+    "min": 1
+  },
+  "class_distribution": {
+    "0": 43312,
+    "1": 121774
+  },
+  "conflicting_label_rows": 2,
+  "created_at_utc": "2026-11-15T01:22:39.675851+00:00",
+  "dataset_hash": "e6f09bceef8d6bd2334034ebcd0cc85f388e116f5abe9d9983d4037f6b611982",
+  "dataset_sha256": "e6f09bceef8d6bd2334034ebcd0cc85f388e116f5abe9d9983d4037f6b611982",
+  "exact_duplicate_rows": 0,
+  "label_validity": {
+    "binary_valid_rows": 165086,
+    "invalid_rows": 0,
+    "valid_values": [
+      0,
+      1
+    ]
+  },
+  "missing_empty_text_rows": 4,
+  "missing_required_columns": [],
+  "normalized_duplicate_rows": 10501,
+  "original_row_count": 165086,
+  "required_columns": [
+    "labels",
+    "source",
+    "text"
+  ],
+  "source_csv": "/Users/adityaraj/Downloads/CS747data/CS747data.csv",
+  "source_distribution": {
+    "ASAP2_train_sourcetexts": 7637,
+    "LAL-train": 4436,
+    "LLM_generated_essay_PaLM": 1384,
+    "Mistral7B-CME-v1": 700,
+    "Mistral7B-CME-v2": 700,
+    "Mistral7B-CME-v3": 700,
+    "Mistral7B-CME-v4": 700,
+    "Mistral7B-CME-v5": 700,
+    "Mistral7B-CME-v6": 700,
+    "Mistral7B-CME-v7": 696,
+    "Mistral7B-CME-v7-15-percent-corruption": 4887,
+    "ai_generated_train_essays": 500,
+    "ai_generated_train_essays_gpt-4": 200,
+    "argugpt": 4038,
+    "falcon_180b_v1": 1055,
+    "feedback-train": 3819,
+    "kf_df": 59668,
+    "llama_70b_v1": 1172,
+    "llama_70b_v2": 302,
+    "llama_falcon_v3": 7000,
+    "persuade15_claude_instant1": 1000,
+    "persuade_2.0_human_scores_demo_id_github": 25996,
+    "train_v3_drcat_01": 22125,
+    "train_v3_drcat_02": 14971
+  },
+  "source_imbalance": {
+    "largest_to_smallest_ratio": 298.34,
+    "max_source_count": 59668,
+    "min_source_count": 200
+  },
+  "source_summary": [
+    {
+      "ai_count": 0,
+      "count": 7637,
+      "human_count": 7637,
+      "source": "ASAP2_train_sourcetexts"
+    },
+    {
+      "ai_count": 0,
+      "count": 4436,
+      "human_count": 4436,
+      "source": "LAL-train"
+    },
+    {
+      "ai_count": 1384,
+      "count": 1384,
+      "human_count": 0,
+      "source": "LLM_generated_essay_PaLM"
+    },
+    {
+      "ai_count": 700,
+      "count": 700,
+      "human_count": 0,
+      "source": "Mistral7B-CME-v1"
+    },
+    {
+      "ai_count": 700,
+      "count": 700,
+      "human_count": 0,
+      "source": "Mistral7B-CME-v2"
+    },
+    {
+      "ai_count": 700,
+      "count": 700,
+      "human_count": 0,
+      "source": "Mistral7B-CME-v3"
+    },
+    {
+      "ai_count": 700,
+      "count": 700,
+      "human_count": 0,
+      "source": "Mistral7B-CME-v4"
+    },
+    {
+      "ai_count": 700,
+      "count": 700,
+      "human_count": 0,
+      "source": "Mistral7B-CME-v5"
+    },
+    {
+      "ai_count": 700,
+      "count": 700,
+      "human_count": 0,
+      "source": "Mistral7B-CME-v6"
+    },
+    {
+      "ai_count": 696,
+      "count": 696,
+      "human_count": 0,
+      "source": "Mistral7B-CME-v7"
+    },
+    {
+      "ai_count": 4887,
+      "count": 4887,
+      "human_count": 0,
+      "source": "Mistral7B-CME-v7-15-percent-corruption"
+    },
+    {
+      "ai_count": 500,
+      "count": 500,
+      "human_count": 0,
+      "source": "ai_generated_train_essays"
+    },
+    {
+      "ai_count": 200,
+      "count": 200,
+      "human_count": 0,
+      "source": "ai_generated_train_essays_gpt-4"
+    },
+    {
+      "ai_count": 4038,
+      "count": 4038,
+      "human_count": 0,
+      "source": "argugpt"
+    },
+    {
+      "ai_count": 1055,
+      "count": 1055,
+      "human_count": 0,
+      "source": "falcon_180b_v1"
+    },
+    {
+      "ai_count": 0,
+      "count": 3819,
+      "human_count": 3819,
+      "source": "feedback-train"
+    },
+    {
+      "ai_count": 59668,
+      "count": 59668,
+      "human_count": 0,
+      "source": "kf_df"
+    },
+    {
+      "ai_count": 1172,
+      "count": 1172,
+      "human_count": 0,
+      "source": "llama_70b_v1"
+    },
+    {
+      "ai_count": 302,
+      "count": 302,
+      "human_count": 0,
+      "source": "llama_70b_v2"
+    },
+    {
+      "ai_count": 7000,
+      "count": 7000,
+      "human_count": 0,
+      "source": "llama_falcon_v3"
+    },
+    {
+      "ai_count": 1000,
+      "count": 1000,
+      "human_count": 0,
+      "source": "persuade15_claude_instant1"
+    },
+    {
+      "ai_count": 0,
+      "count": 25996,
+      "human_count": 25996,
+      "source": "persuade_2.0_human_scores_demo_id_github"
+    },
+    {
+      "ai_count": 20750,
+      "count": 22125,
+      "human_count": 1375,
+      "source": "train_v3_drcat_01"
+    },
+    {
+      "ai_count": 14922,
+      "count": 14971,
+      "human_count": 49,
+      "source": "train_v3_drcat_02"
+    }
+  ],
+  "word_count_summary": {
+    "max": 1656,
+    "mean": 310.58966841525023,
+    "median": 271.0,
+    "min": 0
+  }
+}

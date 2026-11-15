@@ -1,0 +1,53 @@
+{
+  "class_distributions": {
+    "test": {
+      "0": 2544,
+      "1": 15934
+    },
+    "train": {
+      "0": 11873,
+      "1": 74354
+    },
+    "unseen_test": {
+      "0": 25994,
+      "1": 5406
+    },
+    "validation": {
+      "0": 2544,
+      "1": 15933
+    }
+  },
+  "creation_time_utc": "2026-11-15T01:22:51.787568+00:00",
+  "dataset_hash": "e6f09bceef8d6bd2334034ebcd0cc85f388e116f5abe9d9983d4037f6b611982",
+  "held_out_sources": [
+    "Mistral7B-CME-v1",
+    "Mistral7B-CME-v2",
+    "Mistral7B-CME-v3",
+    "Mistral7B-CME-v4",
+    "Mistral7B-CME-v5",
+    "Mistral7B-CME-v6",
+    "Mistral7B-CME-v7",
+    "Mistral7B-CME-v7-15-percent-corruption",
+    "persuade_2.0_human_scores_demo_id_github"
+  ],
+  "note": "Processing is deterministic with the fixed seed and source-family holdout policy.",
+  "random_seed": 747,
+  "split_counts": {
+    "test": 18478,
+    "train": 86227,
+    "unseen_test": 31400,
+    "validation": 18477
+  },
+  "split_fingerprints": {
+    "test": "55f6121fcd64862475926d8340f20f3aaba75071442241bb71b03526adcb66c0",
+    "train": "d061b2abefb14bea38d3a9dfcdb98fcb8634bf749ef3a69b9071888757e80fc1",
+    "unseen_test": "0b635071c9aaccfc9d4973d7b0038db341b40f189fcf67ea8a6239246105e82f",
+    "validation": "86882ce85873ede58dddf5e168385b59adf5245d81aa9ab454914735eb5af4c4"
+  },
+  "split_proportions": {
+    "test": 0.15,
+    "train": 0.7,
+    "unseen_test": 0.0,
+    "validation": 0.15
+  }
+}

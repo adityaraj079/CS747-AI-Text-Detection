@@ -1,0 +1,41 @@
+# Python virtual envs and caches
+.venv/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter and editor state
+.ipynb_checkpoints/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Large raw data and local secrets
+/data/raw/*
+!/data/raw/
+!/data/raw/.gitkeep
+.env
+.env.*
+*.log
+*.tmp
+
+# Model and serialization artifacts
+*.pkl
+*.joblib
+*.h5
+*.bin
+*.pt
+*.ckpt
+*.onnx
+
+# Keep tracked project outputs
+!data/processed/.gitkeep
+!data/manifests/.gitkeep
+!data/figures/.gitkeep
+!data/raw/.gitkeep
