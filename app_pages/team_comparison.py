@@ -4,14 +4,15 @@ import pandas as pd
 import streamlit as st
 
 from app_components.data_loader import compare_results_compatibility, latest_result, partition_metadata
+from app_components.table_graphs import show_architecture, show_bars, show_test_graph
 from app_components.inference import show_live_predictions
 
 TEAM_MODEL_IDS = ("aakash_7th_place", "aditya_3rd_place", "daniel_bert", "yash_5th_place")
 PROJECT_SPLIT_MODELS = ("aditya_3rd_place", "yash_5th_place")
 TEST_SETS = {
-    "External essays": "ghostbuster_essay",
-    "Standard test": "standard_test",
-    "Unseen sources": "unseen_test",
+    "Project standard test": "standard_test",
+    "Project unseen sources": "unseen_test",
+    "Supplemental · Ghostbuster": "ghostbuster_essay",
 }
 
 
@@ -34,11 +35,13 @@ def _table(records, specs, original=False):
         df = pd.DataFrame(rows).set_index("Detector")
         st.table(df.style.format({"ROC-AUC": "{:.4f}", "Accuracy": "{:.2%}",
                                   "F1": "{:.4f}", "Test essays": "{:,}"}, na_rep="—"))
+        show_test_graph(records, specs, original)
 
 
 def render_page(repo_root, results, model_specs, split_manifest, unseen_manifest, adapter_loader):
     st.title("AI essay detection")
     st.subheader("Performance comparison")
+    st.caption("The project corpus supplies the training data and both project tests. Ghostbuster supplies an independent four-model check.")
     label = st.radio("Test set", list(TEST_SETS), horizontal=True, label_visibility="collapsed")
     dataset = TEST_SETS[label]
     external = dataset == "ghostbuster_essay"
@@ -78,7 +81,8 @@ def render_page(repo_root, results, model_specs, split_manifest, unseen_manifest
     with st.expander("Models and evaluation details"):
         for mid in TEAM_MODEL_IDS:
             spec = model_specs[mid]
-            st.markdown(f"**{spec['member']}** · {spec['architecture']}")
+            st.markdown(f"**{spec['member']}**")
+            show_architecture(mid)
         st.write("The external pilot samples matching human and GPT file IDs with seed 747. "
                  "Each pair was screened for matching 32-word passages against the full project corpus "
                  "before any predictions were made. This check cannot detect all paraphrases.")
@@ -86,10 +90,13 @@ def render_page(repo_root, results, model_specs, split_manifest, unseen_manifest
         for r in records:
             st.caption(f"{model_specs[r['model_id']]['short_name']} · {r['source_file']}")
         if not external and records:
-            st.dataframe(pd.DataFrame([{"Detector": model_specs[r["model_id"]]["short_name"],
-                                        "CPU ms / essay": r.get("latency_ms_per_essay"),
-                                        "Essays / second": r.get("throughput")}
-                                       for r in records]), hide_index=True)
+            timings = pd.DataFrame([{"Detector": model_specs[r["model_id"]]["short_name"],
+                                     "CPU ms / essay": r.get("latency_ms_per_essay"),
+                                     "Essays / second": r.get("throughput")} for r in records])
+            st.dataframe(timings, hide_index=True)
+            measured = timings.dropna(subset=["CPU ms / essay"])
+            show_bars("CPU time per essay in the benchmark batch", measured["Detector"].tolist(),
+                      {"ms per essay": measured["CPU ms / essay"].tolist()})
     with st.expander("Try an essay"):
         # Render the lightweight CPU detectors before loading the larger BERT checkpoint.
         live_order = (*PROJECT_SPLIT_MODELS, "aakash_7th_place", "daniel_bert")

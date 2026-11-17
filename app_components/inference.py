@@ -45,12 +45,20 @@ def show_live_predictions(
         st.warning("Enter non-empty essay text.")
         return
 
+    from app_components.table_graphs import show_bars
+
+    def plot_scores(scores):
+        show_bars("Where did each detector score this essay?", list(scores),
+                  {"AI probability": list(scores.values())}, percent=True, threshold=DISPLAY_THRESHOLD)
+
     previous = st.session_state.get(result_key)
     if not analyze:
         if previous and previous["text"] == text:
             st.table(previous["rows"])
+            plot_scores(previous.get("scores", {}))
         return
 
+    scores = {}
     rows = []
     table = st.empty()
     for model_id in model_ids:
@@ -58,6 +66,7 @@ def show_live_predictions(
         with st.spinner(f"Scoring with {name}…"):
             try:
                 probability, latency_ms = warm_predict(adapter_loader(model_id), text)
+                scores[name] = probability
                 row = {"Detector": name, "AI probability": f"{probability:.2%}",
                        "Classification": threshold_decision(probability), "CPU time": f"{latency_ms:.2f} ms"}
             except (ImportError, OSError, RuntimeError, ValueError) as exc:
@@ -65,4 +74,5 @@ def show_live_predictions(
                        "Classification": str(exc), "CPU time": "—"}
         rows.append(row)
         table.table(rows)
-    st.session_state[result_key] = {"text": text, "rows": rows}
+    plot_scores(scores)
+    st.session_state[result_key] = {"text": text, "rows": rows, "scores": scores}
