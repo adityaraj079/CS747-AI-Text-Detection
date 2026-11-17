@@ -27,19 +27,44 @@ def show_bars(title, names, series, *, percent=False, threshold=None):
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
-def show_test_graph(records, specs, original):
+def show_test_graph(records, specs, original, unit="essays"):
     names = [specs[r["model_id"]]["short_name"] for r in records]
     if original:
         show_bars("How many essays contributed to each original score?", names,
                   {"Test essays": [r["record_count"] for r in records]})
+        counts = [r["record_count"] for r in records]
+        st.markdown(f"**Finding.** The original runs tested between {min(counts):,} and {max(counts):,} essays "
+                    "on different splits. Differences in accuracy can reflect which essays each detector saw.")
         return
     matrices = [r.get("confusion_matrix") for r in records]
     if all(m and sum(m[0]) and sum(m[1]) for m in matrices):
         show_bars("How often did each detector make each kind of mistake?", names, {
-            "Human essays flagged": [m[0][1] / sum(m[0]) for m in matrices],
-            "AI essays missed": [m[1][0] / sum(m[1]) for m in matrices],
+            f"Human {unit} flagged": [m[0][1] / sum(m[0]) for m in matrices],
+            f"AI {unit} missed": [m[1][0] / sum(m[1]) for m in matrices],
         }, percent=True)
-        st.caption("Each rate uses its own group as the denominator. Shorter bars mean fewer errors.")
+        human_errors = [m[0][1] for m in matrices]
+        ai_errors = [m[1][0] for m in matrices]
+        fewest_flags = min(human_errors)
+        fewest_misses = min(ai_errors)
+        def tied_names(errors, best):
+            tied = [n for n, e in zip(names, errors) if e == best]
+            return ", ".join(tied[:-1]) + " and " + tied[-1] if len(tied) > 1 else tied[0]
+
+        human_names = tied_names(human_errors, fewest_flags)
+        ai_names = tied_names(ai_errors, fewest_misses)
+        human_total, ai_total = map(sum, matrices[0])
+        if human_names == ai_names:
+            finding = (f"{human_names} made the fewest errors in both groups, flagging "
+                       f"{fewest_flags:,} of {human_total:,} human {unit} and missing "
+                       f"{fewest_misses:,} of {ai_total:,} AI {unit}.")
+        else:
+            finding = (f"{human_names} flagged the fewest human {unit} ({fewest_flags:,} of {human_total:,}). "
+                       f"{ai_names} caught the most AI {unit}, missing {fewest_misses:,} of {ai_total:,}.")
+        if min(human_errors) > human_total / 2:
+            finding = (f"Every detector flagged more than half the human {unit} "
+                       f"({min(human_errors) / human_total:.1%}–{max(human_errors) / human_total:.1%}). "
+                       f"{human_names} made the fewest false alarms at this threshold.")
+        st.markdown(f"**Finding.** {finding}")
 
 
 def show_architecture(model_id):

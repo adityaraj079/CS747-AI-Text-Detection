@@ -1,0 +1,105 @@
+{
+  "source": "https://huggingface.co/datasets/aadityaubhat/GPT-wiki-intro/tree/017258d41991489752363bfa4cbcc12725786967",
+  "file_sha256": "ad1fe3a40c5d52cf80f6545ed8f14ae6d2c0d3dda172e9744aeb101c45dc1a1e",
+  "seed": 747,
+  "words_per_passage": 50,
+  "pairs": 50000,
+  "candidate_pairs": 55000,
+  "excluded_candidate_pairs": 69,
+  "corpus_rows": 165086,
+  "bert_device": "mps",
+  "results": [
+    {
+      "roc_auc": 0.623712654,
+      "accuracy": 0.50062,
+      "precision": 0.5003102481985588,
+      "recall": 0.99982,
+      "f1": 0.66690234791889,
+      "confusion_matrix": [
+        [
+          71,
+          49929
+        ],
+        [
+          9,
+          49991
+        ]
+      ],
+      "threshold": 0.5,
+      "model_id": "aditya_3rd_place",
+      "dataset_type": "wiki_intro_50",
+      "split_id": "94f91997afa5dcd02b06338aef561500f0b21d6064a07d8dd9d490cf8e8778e3",
+      "dataset_hash": "ad1fe3a40c5d52cf80f6545ed8f14ae6d2c0d3dda172e9744aeb101c45dc1a1e",
+      "record_count": 100000
+    },
+    {
+      "roc_auc": 0.6765704772,
+      "accuracy": 0.53669,
+      "precision": 0.5197646982772552,
+      "recall": 0.96486,
+      "f1": 0.6755918413074073,
+      "confusion_matrix": [
+        [
+          5426,
+          44574
+        ],
+        [
+          1757,
+          48243
+        ]
+      ],
+      "threshold": 0.5,
+      "model_id": "aakash_7th_place",
+      "dataset_type": "wiki_intro_50",
+      "split_id": "94f91997afa5dcd02b06338aef561500f0b21d6064a07d8dd9d490cf8e8778e3",
+      "dataset_hash": "ad1fe3a40c5d52cf80f6545ed8f14ae6d2c0d3dda172e9744aeb101c45dc1a1e",
+      "record_count": 100000
+    },
+    {
+      "roc_auc": 0.6387914758,
+      "accuracy": 0.50018,
+      "precision": 0.5000900216051852,
+      "recall": 0.99994,
+      "f1": 0.6667333440017069,
+      "confusion_matrix": [
+        [
+          21,
+          49979
+        ],
+        [
+          3,
+          49997
+        ]
+      ],
+      "threshold": 0.5,
+      "model_id": "yash_5th_place",
+      "dataset_type": "wiki_intro_50",
+      "split_id": "94f91997afa5dcd02b06338aef561500f0b21d6064a07d8dd9d490cf8e8778e3",
+      "dataset_hash": "ad1fe3a40c5d52cf80f6545ed8f14ae6d2c0d3dda172e9744aeb101c45dc1a1e",
+      "record_count": 100000
+    },
+    {
+      "roc_auc": 0.4401320828,
+      "accuracy": 0.50706,
+      "precision": 0.5035689731872043,
+      "recall": 0.99614,
+      "f1": 0.6689633867891585,
+      "confusion_matrix": [
+        [
+          899,
+          49101
+        ],
+        [
+          193,
+          49807
+        ]
+      ],
+      "threshold": 0.5,
+      "model_id": "daniel_bert",
+      "dataset_type": "wiki_intro_50",
+      "split_id": "94f91997afa5dcd02b06338aef561500f0b21d6064a07d8dd9d490cf8e8778e3",
+      "dataset_hash": "ad1fe3a40c5d52cf80f6545ed8f14ae6d2c0d3dda172e9744aeb101c45dc1a1e",
+      "record_count": 100000
+    }
+  ]
+}

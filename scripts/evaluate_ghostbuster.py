@@ -4,63 +4,33 @@ Pass --essays pointing at ghostbuster-data/essay from REVISION and --corpus
 pointing at the full original CS747data.csv (including excluded/duplicate rows).
 """
 import argparse
-import csv
 import hashlib
 import json
 import random
-import re
 import sys
-from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from app_components.model_registry import load_model_adapter
 from evaluation.evaluator import evaluate_model
+from evaluation.external_holdout import screen_pairs
 
 REVISION = "86ebd72590556a81622986fab736ab9227a948af"
 MODELS = ("aakash_7th_place", "aditya_3rd_place", "daniel_bert", "yash_5th_place")
-TOKEN = re.compile(r"\w+")
-WINDOW = 32
 
 
 def collect(essays, corpus):
     ids = sorted(random.Random(747).sample(range(1, 1001), 100))
     samples = []
-    anchors = defaultdict(dict)
-    excluded = set()
-    seen = {}
     for number in ids:
         for label, source in enumerate(("human", "gpt")):
             path = f"{source}/{number}.txt"
             raw = (essays / path).read_bytes()
             text = raw.decode("utf-8-sig").strip()
-            words = TOKEN.findall(text.casefold())
-            if len(words) < WINDOW:
-                excluded.add(number)
-            signature = " ".join(words)
-            if signature in seen:
-                excluded.update((number, seen[signature]))
-            seen[signature] = number
-            for i in range(0, len(words) - WINDOW + 1, WINDOW):
-                phrase = tuple(words[i:i + WINDOW])
-                anchors[phrase[0]].setdefault(phrase, set()).add(number)
             samples.append((number, label, path, hashlib.sha256(raw).hexdigest(), text))
 
-    with corpus.open(newline="", encoding="utf-8-sig") as handle:
-        reader = csv.DictReader(handle)
-        count = 0
-        for row in reader:
-            count += 1
-            words = TOKEN.findall(row["text"].casefold())
-            for i, word in enumerate(words):
-                candidates = anchors.get(word)
-                if candidates:
-                    excluded.update(candidates.get(tuple(words[i:i + WINDOW]), ()))
-    expected = json.loads((ROOT / "data/manifests/data_quality_report.json").read_text())
-    if count != expected["original_row_count"]:
-        raise ValueError("Use the full CS747 source corpus for the overlap check.")
-    return [row for row in samples if row[0] not in excluded], sorted(excluded), count
+    return screen_pairs(samples, corpus)
 
 
 def main():

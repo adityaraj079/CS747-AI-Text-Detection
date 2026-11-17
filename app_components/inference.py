@@ -51,6 +51,10 @@ def show_live_predictions(
         show_bars("Where did each detector score this essay?", list(scores),
                   {"AI probability": list(scores.values())}, percent=True, threshold=DISPLAY_THRESHOLD)
 
+        if scores:
+            flagged = sum(score >= DISPLAY_THRESHOLD for score in scores.values())
+            st.caption(f"{flagged} of {len(scores)} responding detectors classified this essay as AI-generated.")
+
     previous = st.session_state.get(result_key)
     if not analyze:
         if previous and previous["text"] == text:

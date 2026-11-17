@@ -21,7 +21,12 @@ class DanielBertAdapter(ModelAdapter):
     raises ModelNotAvailableError rather than fabricating probabilities.
     """
 
-    def __init__(self, artifact_dir: str | Path | None = None):
+    device = "cpu"
+    batch_size = 8
+
+    def __init__(self, artifact_dir: str | Path | None = None, *, device="cpu", batch_size=8):
+        self.device = device
+        self.batch_size = batch_size
         use_local_only = artifact_dir is not None
         self.artifact_dir = Path(artifact_dir) if artifact_dir else MODEL_DIR / "artifacts"
         self.model_ready = False
@@ -71,7 +76,7 @@ class DanielBertAdapter(ModelAdapter):
                 load_options["token"] = hf_token
             self.tokenizer = AutoTokenizer.from_pretrained(model_source, **load_options)
             self.model = AutoModelForSequenceClassification.from_pretrained(model_source, **load_options)
-            self.model.to("cpu")
+            self.model.to(self.device)
         except Exception as exc:  # pragma: no cover - network-dependent path
             self.unavailable_reason = (
                 f"Model or tokenizer could not be loaded from {model_source}: {exc}. "
@@ -99,14 +104,16 @@ class DanielBertAdapter(ModelAdapter):
 
         probs = []
         with inference_context():
-            for start in range(0, len(batch), 8):
+            for start in range(0, len(batch), self.batch_size):
                 features = self.tokenizer(
-                    batch[start:start + 8],
+                    batch[start:start + self.batch_size],
                     padding=True,
                     truncation=True,
                     max_length=512,
                     return_tensors="pt",
                 )
+                if self.device != "cpu":
+                    features = features.to(self.device)
                 outputs = self.model(**features)
                 logits = getattr(outputs, "logits", outputs)
 
