@@ -52,6 +52,15 @@ def model_availability(model_id: str, repo_root: str | Path) -> tuple[bool, str]
         if not missing:
             return True, "Adapted CPU inference package is available; original competition settings are unverified."
         return False, "Fitted model artifacts are incomplete: " + ", ".join(missing)
+    if model_id == "daniel_bert":
+        config_path = Path(repo_root) / "models" / model_id / "config.json"
+        if not config_path.is_file():
+            return False, "Daniel BERT package configuration is missing."
+        return (
+            True,
+            "Loads the original Hugging Face checkpoint. Its separate 80/10/10 split may overlap "
+            "repository holdouts, so results are not leakage-free or directly comparable.",
+        )
     if model_id not in MODEL_IDS:
         return False, "Unknown model ID."
     return False, "Not integrated: this model's adapter and fitted artifacts are not present."
@@ -84,6 +93,14 @@ def load_model_adapter(model_id: str) -> ModelAdapter:
         from models.aakash_7th_place.adapter import AakashSeventhPlaceAdapter
 
         ModelRegistry.register(model_id, AakashSeventhPlaceAdapter)
+        adapter = ModelRegistry.get(model_id)()
+        if not getattr(adapter, "model_ready", False):
+            raise ModelNotAvailableError(adapter.unavailable_reason)
+        return adapter
+    if model_id == "daniel_bert":
+        from models.daniel_bert.adapter import DanielBertAdapter
+
+        ModelRegistry.register(model_id, DanielBertAdapter)
         adapter = ModelRegistry.get(model_id)()
         if not getattr(adapter, "model_ready", False):
             raise ModelNotAvailableError(adapter.unavailable_reason)

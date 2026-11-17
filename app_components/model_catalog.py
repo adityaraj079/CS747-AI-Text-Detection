@@ -81,12 +81,15 @@ MODEL_SPECS: dict[str, dict[str, Any]] = {
         "short_name": "Daniel BERT",
         "group": "team",
         "member": "Daniel Stiller",
-        "architecture": "Fine-tuned BERT-base-uncased with WordPiece tokenization.",
-        "version": "Model package pending",
-        "reference": COMPETITION_URL,
-        "reference_label": "Kaggle competition",
-        "availability": "Not integrated",
-        "status_detail": "Model weights, tokenizer, and adapter are not present in the repository.",
+        "architecture": "BERT-base sequence classifier with WordPiece tokenization.",
+        "version": "Original 80/10/10 model; split differs from frozen benchmark",
+        "reference": "https://huggingface.co/grumpydan99/BERT",
+        "reference_label": "Hugging Face model",
+        "availability": "Hugging Face checkpoint integrated",
+        "status_detail": (
+            "Loads the original Hugging Face checkpoint. Its separate 80/10/10 split may overlap "
+            "repository holdouts, so evaluations are not leakage-free or directly comparable."
+        ),
     },
 }
 

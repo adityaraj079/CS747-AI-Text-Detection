@@ -1,0 +1,57 @@
+{
+  "model_id": "daniel_bert",
+  "team_member": "Daniel Stiller",
+  "solution_name": "Daniel BERT",
+  "competition": "LLM - Detect AI Generated Text",
+  "competition_track": "Team model / BERT family",
+  "source_reference": "https://www.kaggle.com/competitions/llm-detect-ai-generated-text/",
+  "architecture_summary": "Fine-tuned bert-base-uncased sequence classifier with WordPiece tokenization, 512-token truncation, and a two-class classification head.",
+  "label_orientation": "The original notebook scores class index 1 as the positive class; the project convention is 1 = AI-generated.",
+  "positive_class_id": 1,
+  "training_data_requirements": "Uses the original model trained on the original source dataset, not the repository's frozen partitions. The separate random split creates a risk of overlap with the repository's standard and unseen evaluation partitions; its scores must not be interpreted as leakage-free or directly compared with frozen-split models.",
+  "training_split_description": "Original notebook uses stratified train_test_split with random_state=42: 132068 train, 16509 validation, and 16509 test records (80/10/10). The notebook loads the original CS747data.csv; dataset hash and overlap with the repository's frozen partitions are unknown.",
+  "frozen_split_compliance": false,
+  "verified_training_settings": {
+    "base_model": "bert-base-uncased",
+    "tokenizer": "BertTokenizer from bert-base-uncased",
+    "max_length": 512,
+    "split_strategy": "stratified 80/10/10",
+    "split_random_state": 42,
+    "num_train_epochs_max": 10,
+    "early_stopping_patience": 2,
+    "selection_metric": "validation ROC-AUC"
+  },
+  "dependencies": [
+    "transformers>=4.41",
+    "torch>=2.2",
+    "tokenizers>=0.15"
+  ],
+  "artifact_paths": [
+    "Hugging Face: grumpydan99/BERT at revision 6d5bc663e1c0e2ad7c58b6c940cde29a4aa7ab43"
+  ],
+  "huggingface_model_id": "grumpydan99/BERT",
+  "huggingface_revision": "6d5bc663e1c0e2ad7c58b6c940cde29a4aa7ab43",
+  "hub_repo_type": "model",
+  "cpu_compatibility": "Yes; transformers BERT inference can run on CPU when a trusted checkpoint is present.",
+  "inference_mode": "CPU-ready",
+  "integration_status": "Pinned Hugging Face checkpoint loads and runs inference on CPU; standardized evaluation is not claimed.",
+  "original_notebook_verified": true,
+  "original_notebook_path": "models/daniel_bert/original_notebook.ipynb",
+  "source_reference_verified": true,
+  "dataset_hash": null,
+  "train_split_fingerprint": null,
+  "validation_split_fingerprint": null,
+  "random_seed": 42,
+  "verified_inference": {
+    "huggingface_revision": "6d5bc663e1c0e2ad7c58b6c940cde29a4aa7ab43",
+    "device": "CPU",
+    "smoke_test": "Loaded the pinned model and returned one finite probability for a single text.",
+    "transformers_version": "5.22.2",
+    "torch_version": "2.6.0+cu124",
+    "tokenizers_version": "0.23.3"
+  },
+  "redistribution_limitations": "The Hugging Face model card declares license 'unknown'; check with the model owner before redistribution or reuse beyond this project.",
+  "known_limitations": "The author's stratified 80/10/10 split is distinct from the repository split, so records may overlap with the repository's frozen standard or unseen evaluation sets. Exact data overlap and dataset hash are unknown. The Hugging Face model card has no detailed training documentation and declares license unknown.",
+  "provenance_notes": "Training procedure and class-1 positive orientation were verified from the original notebook. The Hugging Face checkpoint is pinned to an immutable commit. This model does not comply with the frozen-split training requirement in models/model-prompt.md.",
+  "status_detail": "Loaded the pinned public Hugging Face checkpoint and completed a CPU inference smoke test. Repository evaluation datasets are absent, and no standardized evaluation result is claimed."
+}
