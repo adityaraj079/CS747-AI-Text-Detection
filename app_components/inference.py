@@ -10,7 +10,7 @@ DISPLAY_THRESHOLD = 0.5
 
 
 def warm_predict(model: ModelAdapter, text: str) -> tuple[float, float]:
-    """Load the adapter already, then time and validate one CPU prediction."""
+    """Time and validate one CPU prediction from an already-loaded adapter."""
     start = perf_counter()
     probabilities = require_probability_vector(model.predict_proba([text]), 1)
     elapsed_ms = (perf_counter() - start) * 1000.0
@@ -59,16 +59,22 @@ def show_live_predictions(
         if previous and previous["text"] == text:
             st.table(previous["rows"])
             plot_scores(previous.get("scores", {}))
+            for note in previous.get("notes", []):
+                st.caption(note)
         return
 
     scores = {}
     rows = []
+    notes = []
     table = st.empty()
     for model_id in model_ids:
         name = model_specs[model_id]["short_name"]
         with st.spinner(f"Scoring with {name}…"):
             try:
-                probability, latency_ms = warm_predict(adapter_loader(model_id), text)
+                adapter = adapter_loader(model_id)
+                probability, latency_ms = warm_predict(adapter, text)
+                if getattr(adapter, "runtime_note", ""):
+                    notes.append(f"{name}: {adapter.runtime_note} Saved benchmark scores describe the original ensemble.")
                 scores[name] = probability
                 row = {"Detector": name, "AI probability": f"{probability:.2%}",
                        "Classification": threshold_decision(probability), "CPU time": f"{latency_ms:.2f} ms"}
@@ -78,4 +84,6 @@ def show_live_predictions(
         rows.append(row)
         table.table(rows)
     plot_scores(scores)
-    st.session_state[result_key] = {"text": text, "rows": rows, "scores": scores}
+    for note in notes:
+        st.caption(note)
+    st.session_state[result_key] = {"text": text, "rows": rows, "scores": scores, "notes": notes}
