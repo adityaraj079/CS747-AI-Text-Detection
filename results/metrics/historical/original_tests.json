@@ -1,0 +1,98 @@
+{
+  "source": "CS747_Progress_Report_Revised.pdf",
+  "source_sha256": "4800d204ff307006f74f34803cbb4165996465a4e381763019147571c6019742",
+  "pages": [
+    1,
+    2
+  ],
+  "results": [
+    {
+      "model_id": "aditya_3rd_place",
+      "record_count": 15945,
+      "dataset_type": "original_test",
+      "result_category": "historical",
+      "roc_auc": 0.999546,
+      "accuracy": 0.9945,
+      "precision": 0.998,
+      "recall": 0.9945,
+      "f1": 0.9962,
+      "threshold": 0.5,
+      "confusion_matrix": [
+        [
+          4304,
+          23
+        ],
+        [
+          64,
+          11554
+        ]
+      ]
+    },
+    {
+      "model_id": "yash_5th_place",
+      "record_count": 1000,
+      "dataset_type": "original_test",
+      "result_category": "historical",
+      "roc_auc": 0.994046,
+      "accuracy": 0.951,
+      "precision": 0.9493,
+      "recall": 0.9848,
+      "f1": 0.9667,
+      "threshold": 0.5,
+      "confusion_matrix": [
+        [
+          240,
+          38
+        ],
+        [
+          11,
+          711
+        ]
+      ]
+    },
+    {
+      "model_id": "daniel_bert",
+      "record_count": 16509,
+      "dataset_type": "original_test",
+      "result_category": "historical",
+      "roc_auc": 0.9661,
+      "accuracy": 0.9431999999999999,
+      "precision": 0.9996,
+      "recall": 0.9234,
+      "f1": 0.96,
+      "threshold": 0.5,
+      "confusion_matrix": [
+        [
+          4328,
+          4
+        ],
+        [
+          933,
+          11244
+        ]
+      ]
+    },
+    {
+      "model_id": "aakash_7th_place",
+      "record_count": 15458,
+      "dataset_type": "original_test",
+      "result_category": "historical",
+      "roc_auc": 0.9996,
+      "accuracy": 0.9863,
+      "precision": 1.0,
+      "recall": 0.981,
+      "f1": 0.9904,
+      "threshold": 0.5,
+      "confusion_matrix": [
+        [
+          4296,
+          0
+        ],
+        [
+          212,
+          10950
+        ]
+      ]
+    }
+  ]
+}

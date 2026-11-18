@@ -32,45 +32,51 @@ def show_live_predictions(
     import streamlit as st
 
     st.subheader(section_title)
-    st.caption(
-        "Predictions are model probabilities, not ground-truth determinations. "
-        "The classification uses a provisional 0.50 threshold; official evaluation should use "
-        "a threshold selected from validation data."
-    )
+    st.caption(f"Each detector reports its estimated AI probability. The decision threshold is {DISPLAY_THRESHOLD:.2f}.")
     text = st.text_area(
         "Essay text",
         key=f"live-text-{section_title}",
         height=160,
         placeholder="Paste text to compare available registered models.",
     )
-    if not st.button("Analyze Essay", key=f"analyze-{section_title}", type="primary"):
-        return
-    if not text.strip():
+    analyze = st.button("Analyze Essay", key=f"analyze-{section_title}", type="primary")
+    result_key = f"predictions-{section_title}"
+    if analyze and not text.strip():
         st.warning("Enter non-empty essay text.")
         return
 
+    from app_components.table_graphs import show_bars
+
+    def plot_scores(scores):
+        show_bars("Where did each detector score this essay?", list(scores),
+                  {"AI probability": list(scores.values())}, percent=True, threshold=DISPLAY_THRESHOLD)
+
+        if scores:
+            flagged = sum(score >= DISPLAY_THRESHOLD for score in scores.values())
+            st.caption(f"{flagged} of {len(scores)} responding detectors classified this essay as AI-generated.")
+
+    previous = st.session_state.get(result_key)
+    if not analyze:
+        if previous and previous["text"] == text:
+            st.table(previous["rows"])
+            plot_scores(previous.get("scores", {}))
+        return
+
+    scores = {}
+    rows = []
+    table = st.empty()
     for model_id in model_ids:
-        spec = model_specs[model_id]
-        try:
-            adapter = adapter_loader(model_id)
-            probability, latency_ms = warm_predict(adapter, text)
-        except (ImportError, FileNotFoundError, RuntimeError, ValueError) as exc:
-            st.info(f"**{spec['short_name']} unavailable:** {exc}")
-            continue
-        columns = st.columns([2, 1, 1, 1])
-        columns[0].markdown(f"**{spec['name']}**")
-        columns[1].metric("P(AI-generated)", f"{probability:.3f}")
-        columns[2].metric(
-            "Classification",
-            threshold_decision(probability),
-            help=f"AI-generated when P(AI-generated) >= {DISPLAY_THRESHOLD:.2f}; otherwise Not AI-generated.",
-        )
-        columns[3].metric(
-            "Detection time",
-            f"{latency_ms:.2f} ms",
-            help=(
-                "Time this model took to produce this prediction, measured after an untimed "
-                "warm-up call. Excludes model loading and warm-up; includes prediction and "
-                "output validation."
-            ),
-        )
+        name = model_specs[model_id]["short_name"]
+        with st.spinner(f"Scoring with {name}…"):
+            try:
+                probability, latency_ms = warm_predict(adapter_loader(model_id), text)
+                scores[name] = probability
+                row = {"Detector": name, "AI probability": f"{probability:.2%}",
+                       "Classification": threshold_decision(probability), "CPU time": f"{latency_ms:.2f} ms"}
+            except (ImportError, OSError, RuntimeError, ValueError) as exc:
+                row = {"Detector": name, "AI probability": "Unavailable",
+                       "Classification": str(exc), "CPU time": "—"}
+        rows.append(row)
+        table.table(rows)
+    plot_scores(scores)
+    st.session_state[result_key] = {"text": text, "rows": rows, "scores": scores}

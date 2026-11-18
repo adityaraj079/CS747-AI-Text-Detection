@@ -280,6 +280,22 @@ def render_page(
     published = _published_result(root)
     published_auc = _published_auc(published)
     standard, unseen = _standardized_results(results)
+    if not standard and not unseen and not model_availability(CUSTOM_MODEL_ID, root)[0]:
+        st.title("Kaggle champion vs. our custom model")
+        champion, custom = st.columns(2)
+        with champion.container(border=True):
+            st.subheader("Kaggle champion")
+            st.metric("Private leaderboard ROC-AUC",
+                      f"{published_auc:.6f}" if published_auc is not None else "Unavailable")
+            st.caption(published.get("architecture_summary", ""))
+        with custom.container(border=True):
+            st.subheader("Our custom model")
+            st.metric("Local test ROC-AUC", "Pending")
+            st.caption("Training and evaluation on the project’s frozen test split are pending.")
+        writeup = published.get("source_urls", {}).get("first_place_writeup")
+        if writeup:
+            st.markdown(f"[Official first-place write-up]({writeup})")
+        return
     custom_spec = model_specs.get(CUSTOM_MODEL_ID, {})
     custom_spec = {
         **custom_spec,

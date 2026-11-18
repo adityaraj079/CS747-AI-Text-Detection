@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
@@ -25,6 +25,7 @@ from app_components.inference import show_live_predictions
 from app_components.model_cards import render_model_card
 from app_components.model_registry import model_availability
 from app_components.styling import plotly_template
+from app_components.table_graphs import show_architecture, show_bars, show_test_graph
 
 TEAM_MODEL_IDS = ("yash_5th_place", "aakash_7th_place", "aditya_3rd_place", "daniel_bert")
 RESULT_CATEGORIES = {
@@ -34,6 +35,9 @@ RESULT_CATEGORIES = {
 DATASET_TYPES = {
     "Standard held-out test": "standard_test",
     "Unseen-source test": "unseen_test",
+    "Supplemental · Ghostbuster": "ghostbuster_essay",
+    "Supplemental · HC3": "hc3_answers",
+    "Supplemental · GPT-wiki-intro": "wiki_intro_50",
 }
 TABLE_METRICS = (
     ("ROC-AUC", "roc_auc", 3),
@@ -78,6 +82,86 @@ def _comparison_frame(
         row["Timestamp"] = record.get("timestamp", "Not recorded") if record else "Not evaluated"
         rows.append(row)
     return pd.DataFrame(rows)
+
+
+def _render_external_comparison(
+    results: list[dict[str, Any]],
+    model_specs: dict[str, dict[str, Any]],
+    dataset_type: str,
+) -> None:
+    unit = "answers" if dataset_type == "hc3_answers" else (
+        "passages" if dataset_type == "wiki_intro_50" else "essays"
+    )
+    records = [
+        latest_result(results, model_id, dataset_type, "standardized")
+        for model_id in TEAM_MODEL_IDS
+    ]
+    records = [record for record in records if record]
+
+    if len(records) != len(TEAM_MODEL_IDS):
+        st.info("A complete set of compatible supplemental scores is unavailable for this test.")
+        return
+    reference = records[0]
+    compatible = all(
+        compare_results_compatibility(reference, record)[0]
+        and record.get("threshold") == reference.get("threshold")
+        and record.get("record_count") == reference.get("record_count")
+        for record in records[1:]
+    )
+    if not compatible:
+        st.warning("Supplemental scores differ in dataset provenance or evaluation settings.")
+        return
+
+    rows = []
+    for record in records:
+        row = {"Detector": model_specs[record["model_id"]]["short_name"]}
+        row.update({
+            "ROC-AUC": record.get("roc_auc"),
+            "Accuracy": record.get("accuracy"),
+            "F1": record.get("f1"),
+        })
+        if record.get("confusion_matrix"):
+            matrix = record["confusion_matrix"]
+            row["Humans flagged"] = matrix[0][1]
+            row[f"AI {unit} missed"] = matrix[1][0]
+        rows.append(row)
+
+    matrix = reference["confusion_matrix"]
+    st.caption(
+        f"{reference['record_count']:,} {unit} · {sum(matrix[0]):,} human · "
+        f"{sum(matrix[1]):,} AI · decision threshold {reference['threshold']:.2f}"
+    )
+    frame = pd.DataFrame(rows).set_index("Detector")
+    st.table(frame.style.format({
+        "ROC-AUC": "{:.4f}",
+        "Accuracy": "{:.2%}",
+        "F1": "{:.4f}",
+    }, na_rep="—"))
+    show_test_graph(records, model_specs, False, unit)
+
+    if dataset_type == "hc3_answers":
+        st.caption(
+            "Each English HC3 question contributes one human answer and one ChatGPT answer. "
+            "Detectors received only the answers."
+        )
+    elif dataset_type == "wiki_intro_50":
+        st.caption(
+            "Each topic contributes 50 words from Wikipedia and 50 words from a GPT Curie continuation."
+        )
+    else:
+        st.caption(
+            "All four frozen models scored the same Ghostbuster essay sample "
+            "after duplicate and corpus-overlap screening."
+        )
+
+    with st.expander("Model and dataset details"):
+        for model_id in TEAM_MODEL_IDS:
+            st.markdown(f"**{model_specs[model_id]['member']}**")
+            show_architecture(model_id)
+        for record in records:
+            st.caption(
+                f"{model_specs[record['model_id']]['short_name']} · {record['source_file']}"
+            )
 
 
 def _all_share_dataset(selected: dict[str, dict[str, Any] | None]) -> tuple[bool, str]:
@@ -257,6 +341,10 @@ def render_page(
         )
     st.dataframe(_comparison_frame(table_results, model_specs), use_container_width=True, hide_index=True)
 
+    if dataset_type in {"ghostbuster_essay", "hc3_answers", "wiki_intro_50"}:
+        st.subheader("Supplemental test comparison")
+        _render_external_comparison(results, model_specs, dataset_type)
+
     if all_compatible:
         st.subheader("Detection metrics")
         detection_figure = metric_comparison_figure(
@@ -397,6 +485,35 @@ def render_page(
         model_specs[detail_id],
         _model_detail_result(results, selected, detail_id, dataset_type),
     )
+
+    st.subheader("Results on each model's original test set")
+    st.caption("Each team member used a different test split. Values are from the original progress report.")
+    originals = [
+        latest_result(results, model_id, "original_test", "historical")
+        for model_id in TEAM_MODEL_IDS
+    ]
+    originals = [record for record in originals if record]
+    if originals:
+        original_rows = []
+        for record in originals:
+            row = {
+                "Detector": model_specs[record["model_id"]]["short_name"],
+                "Test essays": record["record_count"],
+                "ROC-AUC": record.get("roc_auc"),
+                "Accuracy": record.get("accuracy"),
+                "F1": record.get("f1"),
+            }
+            original_rows.append(row)
+        original_frame = pd.DataFrame(original_rows).set_index("Detector")
+        st.table(original_frame.style.format({
+            "ROC-AUC": "{:.4f}",
+            "Accuracy": "{:.2%}",
+            "F1": "{:.4f}",
+            "Test essays": "{:,}",
+        }, na_rep="—"))
+        show_test_graph(originals, model_specs, True)
+    else:
+        st.info("Original test results are unavailable.")
 
     show_live_predictions(
         TEAM_MODEL_IDS,
