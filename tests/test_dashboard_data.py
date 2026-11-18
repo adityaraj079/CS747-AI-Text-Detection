@@ -21,13 +21,8 @@ from app_components.charts import generalization_gap_table, metric_comparison_fi
 from app_components.inference import threshold_decision
 from app_components.model_registry import MODEL_IDS, load_model_adapter, model_availability
 from app_components.model_catalog import MODEL_SPECS
-from app_pages.team_comparison import (
-    TEAM_MODEL_IDS,
-    _comparison_frame,
-    _comparison_table_results,
-    _model_card_result,
-    _model_detail_result,
-)
+from app_pages.team_comparison import _original_test_result
+
 from evaluation.model_adapters import ModelNotAvailableError, require_probability_vector
 
 
@@ -134,51 +129,21 @@ def test_latest_result_selects_latest_timestamp():
     assert latest_result(rows, "m", "test", "standardized")["timestamp"] == "2026-02-01"
 
 
-def test_daniel_model_card_falls_back_to_historical_result_only_when_no_standardized_result():
-    historical = {
-        "model_id": "daniel_bert",
-        "dataset_type": "standard_test",
-        "result_category": "historical",
-        "evaluation_partition": "daniel_original_80_10_10_test",
-    }
-    other_historical = {
-        "model_id": "yash_5th_place",
-        "dataset_type": "standard_test",
-        "result_category": "historical",
-    }
-    assert _model_card_result([historical, other_historical], "daniel_bert") is historical
-    assert _model_card_result([historical, other_historical], "yash_5th_place") is None
-
-    standardized = {
-        "model_id": "daniel_bert",
-        "dataset_type": "standard_test",
-        "result_category": "standardized",
-    }
-    assert _model_card_result([historical, standardized], "daniel_bert") is standardized
+def test_original_table_prefers_daniel_measured_original_split():
+    report = {"model_id": "daniel_bert", "dataset_type": "original_test",
+              "result_category": "historical", "roc_auc": 0.9661}
+    measured = {"model_id": "daniel_bert", "dataset_type": "standard_test",
+                "result_category": "historical", "roc_auc": 0.966120860353795,
+                "evaluation_partition": "daniel_original_80_10_10_test"}
+    assert _original_test_result([report, measured], "daniel_bert") is measured
+    assert _original_test_result([report], "daniel_bert") is report
 
 
-def test_daniel_historical_result_is_visible_in_table_and_model_detail_but_stays_separate():
-    historical = {
-        "model_id": "daniel_bert",
-        "dataset_type": "standard_test",
-        "result_category": "historical",
-        "roc_auc": 0.966,
-        "evaluation_partition": "daniel_original_80_10_10_test",
-    }
-    results = [historical]
-    selected = {model_id: None for model_id in TEAM_MODEL_IDS}
-
-    table_results = _comparison_table_results(
-        results, selected, "standard_test", "standardized"
-    )
-    row = _comparison_frame(table_results, MODEL_SPECS).set_index("Model").loc["Daniel BERT"]
-    assert row["Status"] == "Historical"
-    assert row["Result type"] == "Historical"
-    assert row["ROC-AUC"] == "0.966"
-    assert _model_detail_result(results, selected, "daniel_bert", "standard_test") is historical
-    assert _comparison_table_results(results, selected, "unseen_test", "standardized")[
-        "daniel_bert"
-    ] is None
+def test_original_table_does_not_substitute_shared_benchmark_results():
+    shared = {"model_id": "daniel_bert", "dataset_type": "standard_test",
+              "result_category": "standardized"}
+    assert _original_test_result([shared], "daniel_bert") is None
+    assert _original_test_result([shared], "yash_5th_place") is None
 
 
 def test_dashboard_allowlist_has_six_models_and_rejects_unknown_adapter():
