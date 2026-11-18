@@ -10,8 +10,7 @@ DISPLAY_THRESHOLD = 0.5
 
 
 def warm_predict(model: ModelAdapter, text: str) -> tuple[float, float]:
-    """Warm the loaded adapter, then time one validated CPU prediction."""
-    model.predict_proba([text])
+    """Load the adapter already, then time and validate one CPU prediction."""
     start = perf_counter()
     probabilities = require_probability_vector(model.predict_proba([text]), 1)
     elapsed_ms = (perf_counter() - start) * 1000.0

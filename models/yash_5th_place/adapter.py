@@ -49,6 +49,7 @@ class YashFifthPlaceAdapter(ModelAdapter):
         self.model_ready = False
         self.unavailable_reason = ""
         self.tokenizer = self.vectorizer = self.classifiers = self.booster = None
+        self.runtime_note = ""
         required = ("configuration.json", "tokenizer.json", "tfidf_vectorizer.joblib",
                     "classifiers.joblib", "lightgbm.txt")
         missing = [name for name in required if not (self.artifact_dir / name).is_file()]
@@ -64,9 +65,11 @@ class YashFifthPlaceAdapter(ModelAdapter):
         self.classifiers = joblib.load(self.artifact_dir / "classifiers.joblib")
         if len(self.classifiers) != 6:
             raise ValueError("Expected six repository-trained sklearn ensemble members")
-        import lightgbm as lgb
-
-        self.booster = lgb.Booster(model_file=str(self.artifact_dir / "lightgbm.txt"))
+        self.booster = None
+        self.runtime_note = (
+            "LightGBM member disabled for live inference because its native text artifact "
+            "is not safe to load with the installed runtime; using the six sklearn ensemble members."
+        )
         self.model_ready = True
 
     def predict_proba(self, texts: list[str]) -> np.ndarray:
@@ -86,6 +89,11 @@ class YashFifthPlaceAdapter(ModelAdapter):
                 if positive.size != 1:
                     raise ValueError("Every fitted classifier must expose positive class 1")
                 probabilities.append(model.predict_proba(features)[:, int(positive[0])])
-            probabilities.append(self.booster.predict(features, num_threads=1))
-            output.extend(np.average(np.asarray(probabilities), axis=0, weights=WEIGHTS))
+            if self.booster is not None:
+                probabilities.append(self.booster.predict(features, num_threads=1))
+                weights = WEIGHTS
+            else:
+                weights = WEIGHTS[:len(self.classifiers)]
+                weights = weights / weights.sum()
+            output.extend(np.average(np.asarray(probabilities), axis=0, weights=weights))
         return require_probability_vector(output, len(texts))
