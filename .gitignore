@@ -1,4 +1,5 @@
 # Python virtual envs and caches
+.venv312/
 .venv/
 venv/
 ENV/
