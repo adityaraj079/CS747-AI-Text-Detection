@@ -10,11 +10,11 @@ from app_components.inference import show_live_predictions
 TEAM_MODEL_IDS = ("aakash_7th_place", "aditya_3rd_place", "daniel_bert", "yash_5th_place")
 PROJECT_SPLIT_MODELS = ("aditya_3rd_place", "yash_5th_place")
 TEST_SETS = {
-    "Project standard test": "standard_test",
-    "Project unseen sources": "unseen_test",
     "Supplemental · Ghostbuster": "ghostbuster_essay",
     "Supplemental · HC3": "hc3_answers",
     "Supplemental · GPT-wiki-intro": "wiki_intro_50",
+    "Project standard test": "standard_test",
+    "Project unseen sources": "unseen_test",
 }
 
 
