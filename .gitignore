@@ -21,6 +21,7 @@ Thumbs.db
 !/data/raw/
 !/data/raw/.gitkeep
 data/**/*.csv
+data/processed/daniel_bert_original_80_10_10/
 .env
 .env.*
 *.log

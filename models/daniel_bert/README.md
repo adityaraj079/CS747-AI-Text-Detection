@@ -44,6 +44,15 @@ The adapter implements `predict_proba(texts: list[str])` and returns a finite Nu
 
 The adapter supports a local checkpoint override and the configured Hub model. It raises `ModelNotAvailableError` if loading fails instead of fabricating probabilities. The original notebook treats output class index 1 as the positive class.
 
-## Use with the shared evaluator
+## Evaluate and save results
 
-The adapter implements `evaluation.model_adapters.ModelAdapter` and can be run through `scripts/evaluate_registered_model.py`. Evaluation requires the frozen processed test CSVs to exist locally. Because the model's training partition may overlap the repository's holdouts, do not report those scores as leakage-free standardized results.
+The recreated original split is stored locally under `data/processed/daniel_bert_original_80_10_10/`. Run the Daniel-only evaluator from the repository root:
+
+```bash
+python models/daniel_bert/evaluate_original_split.py
+```
+
+It reports processed essay count, elapsed time, and an estimated time remaining every ten seconds. The ETA is based on average inference throughput and becomes more reliable as the run progresses. The evaluation uses the shared metric functions and saves one historical result after inference and the CPU benchmark complete:
+`results/metrics/historical/daniel_bert_original_80_10_10_test.json`.
+
+The evaluation does not use or overwrite the frozen project test partitions. Because the model was trained using the separate 80/10/10 split, its result is historical and should not be treated as a leakage-free comparison with models trained on the repository's frozen split.

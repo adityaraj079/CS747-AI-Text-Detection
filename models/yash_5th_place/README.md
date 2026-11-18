@@ -31,6 +31,9 @@ returns `P(label == 1)` (AI-generated) on CPU. Generated assets are stored in
 `artifacts/`: `configuration.json`, `tokenizer.json`, `tfidf_vectorizer.joblib`,
 `classifiers.joblib`, and `lightgbm.txt`. The sklearn joblib files are trusted,
 repository-generated artifacts; do not load replacements from untrusted sources.
+Install this model's `requirements.txt` before inference: the adapter checks for
+the exact scikit-learn and LightGBM versions recorded in `configuration.json`
+and reports the model unavailable if either differs.
 
 The locally supplied CSV reserializes to a different dataframe hash under the
 available pandas version. Its four record counts and split fingerprints match

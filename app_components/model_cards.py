@@ -55,4 +55,15 @@ def render_model_card(
         for column, (label, metric) in zip(metric_columns, metrics):
             column.metric(label, format_metric(result.get(metric), digits=3 if metric not in {"latency_ms_per_essay", "model_size_mb"} else 2))
         if compact:
-            st.caption(f"Evaluation set: {result.get('dataset_type') or 'Not recorded'}")
+            if result.get("result_category") == "historical":
+                st.warning(
+                    result.get(
+                        "training_split_warning",
+                        "Historical result; it may not be comparable with frozen-split results.",
+                    )
+                )
+                st.caption(
+                    f"Evaluation set: {result.get('evaluation_partition') or result.get('dataset_type') or 'Not recorded'} · Historical"
+                )
+            else:
+                st.caption(f"Evaluation set: {result.get('dataset_type') or 'Not recorded'}")

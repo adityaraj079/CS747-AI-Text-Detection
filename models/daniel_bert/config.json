@@ -38,10 +38,24 @@
   "original_notebook_verified": true,
   "original_notebook_path": "models/daniel_bert/original_notebook.ipynb",
   "source_reference_verified": true,
-  "dataset_hash": null,
-  "train_split_fingerprint": null,
-  "validation_split_fingerprint": null,
+  "dataset_hash": "5038af25f2b344e8eeb51c3e09e4ff9eeb3b17c851651cb52f502b1287609434",
+  "dataset_hash_method": "SHA-256 of text,labels CSV serialization after dropping source, index excluded",
+  "source_csv_sha256": "ffb06f7e6ab92b0746c797d1d659155a85d7e15d779359c2cf73d55cc5f1fbc1",
+  "train_split_fingerprint": "fc4d422e404a84cc1103f71af5ff9d2bb88a80db5e5be6752dc8e9e6f3535e0b",
+  "validation_split_fingerprint": "56667e46655ac9fe3c92d313b13ca387399745a62ca9ba307027e3ddd0a39f5e",
   "random_seed": 42,
+  "recreated_original_split": {
+    "split_method": "stratified train_test_split; test_size=0.2, then test_size=0.5",
+    "split_counts": {
+      "train": 132068,
+      "validation": 16509,
+      "test": 16509
+    },
+    "test_split_fingerprint": "cfa54aa97861ac2d367fa28e1805564b97bb2c80a35ba3a40a9c93a574657832",
+    "fingerprint_method": "SHA-256 of comma-separated sorted zero-based original row indices",
+    "local_manifest": "data/processed/daniel_bert_original_80_10_10/manifest.json",
+    "training_copy_identity_verified": false
+  },
   "verified_inference": {
     "huggingface_revision": "6d5bc663e1c0e2ad7c58b6c940cde29a4aa7ab43",
     "device": "CPU",
@@ -51,7 +65,7 @@
     "tokenizers_version": "0.23.3"
   },
   "redistribution_limitations": "The Hugging Face model card declares license 'unknown'; check with the model owner before redistribution or reuse beyond this project.",
-  "known_limitations": "The author's stratified 80/10/10 split is distinct from the repository split, so records may overlap with the repository's frozen standard or unseen evaluation sets. Exact data overlap and dataset hash are unknown. The Hugging Face model card has no detailed training documentation and declares license unknown.",
-  "provenance_notes": "Training procedure and class-1 positive orientation were verified from the original notebook. The Hugging Face checkpoint is pinned to an immutable commit. This model does not comply with the frozen-split training requirement in models/model-prompt.md.",
+  "known_limitations": "The author's stratified 80/10/10 split is distinct from the repository split, so records may overlap with the repository's frozen standard or unseen evaluation sets. A split was recreated from the provided original dataset file, but identity with the exact training-time copy has not been independently verified. The Hugging Face model card has no detailed training documentation and declares license unknown.",
+  "provenance_notes": "Training procedure and class-1 positive orientation were verified from the original notebook. The original 80/10/10 split was recreated from the user-provided dataset using random_state=42, and local dataset/split hashes are recorded. Whether that file is byte-identical to the training-time copy is unverified. The Hugging Face checkpoint is pinned to an immutable commit. This model does not comply with the frozen-split training requirement in models/model-prompt.md.",
   "status_detail": "Loaded the pinned public Hugging Face checkpoint and completed a CPU inference smoke test. Repository evaluation datasets are absent, and no standardized evaluation result is claimed."
 }

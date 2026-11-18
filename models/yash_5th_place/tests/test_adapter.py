@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import json
 import numpy as np
+import tempfile
 import unittest
+from pathlib import Path
+from unittest.mock import patch
 
 from models.yash_5th_place.adapter import YashFifthPlaceAdapter
 from evaluation.model_adapters import ModelNotAvailableError
@@ -43,6 +47,44 @@ class AdapterTests(unittest.TestCase):
     adapter = YashFifthPlaceAdapter("missing_test_artifacts")
     with self.assertRaisesRegex(ModelNotAvailableError, "Missing fitted model artifacts"):
       adapter.predict_proba(["some text"])
+
+
+  def test_incompatible_artifact_dependencies_are_rejected_before_loading_models(self):
+    with tempfile.TemporaryDirectory() as temporary_directory:
+      artifact_dir = Path(temporary_directory)
+      for filename in (
+          "tokenizer.json",
+          "tfidf_vectorizer.joblib",
+          "classifiers.joblib",
+          "lightgbm.txt",
+      ):
+        (artifact_dir / filename).touch()
+      (artifact_dir / "configuration.json").write_text(
+          json.dumps(
+              {
+                  "model_id": "yash_5th_place",
+                  "dependencies": {
+                      "scikit_learn": "1.6.1",
+                      "lightgbm": "4.6.0",
+                  },
+              }
+          ),
+          encoding="utf-8",
+      )
+      installed_versions = {"scikit-learn": "1.9.1", "lightgbm": "4.7.0"}
+      with (
+          patch(
+              "models.yash_5th_place.adapter.version",
+              side_effect=installed_versions.__getitem__,
+          ),
+          patch("models.yash_5th_place.adapter.joblib.load") as load,
+      ):
+        with self.assertRaisesRegex(
+            ModelNotAvailableError,
+            "scikit-learn 1.6.1 .* lightgbm 4.6.0",
+        ):
+          YashFifthPlaceAdapter(artifact_dir)
+      load.assert_not_called()
 
 
   def test_valid_output_shape_range_and_ai_orientation(self):

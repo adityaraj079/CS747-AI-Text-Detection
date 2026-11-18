@@ -1,0 +1,54 @@
+{
+  "result_category": "historical",
+  "model_id": "daniel_bert",
+  "dataset_hash": "5038af25f2b344e8eeb51c3e09e4ff9eeb3b17c851651cb52f502b1287609434",
+  "split_id": "cfa54aa97861ac2d367fa28e1805564b97bb2c80a35ba3a40a9c93a574657832",
+  "dataset_type": "standard_test",
+  "evaluation_partition": "daniel_original_80_10_10_test",
+  "evaluation_protocol": "stratified train_test_split; test_size=0.2, then test_size=0.5",
+  "training_split_warning": "The model was trained using this dataset's separate 80/10/10 training partition. This result is historical and not comparable with the repository's frozen-split results.",
+  "record_count": 16509,
+  "threshold": 0.5,
+  "timestamp": "2026-11-18T00:37:00.920312+00:00",
+  "software": {
+    "python": "3.12.15",
+    "numpy": "2.5.2",
+    "pandas": "3.1.1",
+    "scikit_learn": "1.9.1"
+  },
+  "benchmark": {
+    "batch_size": 32,
+    "warmup_steps": 3,
+    "repeats": 5,
+    "median_elapsed_seconds": 11.045848499998101,
+    "milliseconds_per_essay": 345.18276562494066,
+    "throughput_essays_per_second": 2.897016014659761,
+    "peak_ram_mb": 1010.70703125,
+    "cpu_model": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "system_info": "Windows-10-10.0.19045-SP0",
+    "python_version": "3.12.15",
+    "thread_count": 16
+  },
+  "roc_auc": 0.966120860353795,
+  "accuracy": 0.9432430795323763,
+  "precision": 0.9996443812233285,
+  "recall": 0.923380142892338,
+  "f1": 0.96,
+  "confusion_matrix": [
+    [
+      4328,
+      4
+    ],
+    [
+      933,
+      11244
+    ]
+  ],
+  "latency_ms_per_essay": 345.18276562494066,
+  "throughput": 2.897016014659761,
+  "cpu_model": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+  "thread_count": 16,
+  "batch_size": 32,
+  "peak_ram_mb": 1010.70703125,
+  "model_size_mb": null
+}

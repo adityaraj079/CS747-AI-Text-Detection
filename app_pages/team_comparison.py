@@ -56,9 +56,11 @@ def _comparison_frame(
     rows = []
     for model_id in TEAM_MODEL_IDS:
         record = selected.get(model_id)
+        result_type = "Historical" if record and record.get("result_category") == "historical" else "Standardized"
         row: dict[str, Any] = {
             "Model": model_specs[model_id]["short_name"],
-            "Status": "Evaluated" if record else "Not evaluated",
+            "Status": result_type if record else "Not evaluated",
+            "Result type": result_type if record else "Not evaluated",
         }
         for label, key, digits in TABLE_METRICS:
             row[label] = format_metric(finite_metric(record, key), digits=digits)
@@ -90,6 +92,45 @@ def _all_share_dataset(selected: dict[str, dict[str, Any] | None]) -> tuple[bool
     return True, "All available results share compatible dataset provenance."
 
 
+def _model_card_result(
+    results: list[dict[str, Any]],
+    model_id: str,
+) -> dict[str, Any] | None:
+    standardized = latest_result(results, model_id, "standard_test", "standardized")
+    if standardized is not None or model_id != "daniel_bert":
+        return standardized
+    return latest_result(results, model_id, "standard_test", "historical")
+
+
+def _comparison_table_results(
+    results: list[dict[str, Any]],
+    selected: dict[str, dict[str, Any] | None],
+    dataset_type: str,
+    result_category: str,
+) -> dict[str, dict[str, Any] | None]:
+    table_results = dict(selected)
+    if dataset_type == "standard_test" and result_category == "standardized":
+        table_results["daniel_bert"] = table_results.get("daniel_bert") or latest_result(
+            results,
+            "daniel_bert",
+            "standard_test",
+            "historical",
+        )
+    return table_results
+
+
+def _model_detail_result(
+    results: list[dict[str, Any]],
+    selected: dict[str, dict[str, Any] | None],
+    model_id: str,
+    dataset_type: str,
+) -> dict[str, Any] | None:
+    result = selected.get(model_id)
+    if result is None and model_id == "daniel_bert" and dataset_type == "standard_test":
+        return latest_result(results, model_id, "standard_test", "historical")
+    return result
+
+
 def _render_model_detail(
     spec: dict[str, Any],
     result: dict[str, Any] | None,
@@ -117,7 +158,11 @@ def _render_model_detail(
         )
         figure = confusion_matrix_figure(result, template=plotly_template())
         if figure is not None:
-            st.plotly_chart(figure, use_container_width=True)
+            st.plotly_chart(
+                figure,
+                use_container_width=True,
+                key=f"team-model-detail-confusion-{spec['name']}",
+            )
         else:
             st.info("No actual confusion matrix is present in this result.")
     else:
@@ -145,12 +190,7 @@ def render_page(
     )
 
     card_results = {
-        model_id: latest_result(
-            results,
-            model_id,
-            "standard_test",
-            "standardized",
-        )
+        model_id: _model_card_result(results, model_id)
         for model_id in TEAM_MODEL_IDS
     }
     card_columns = st.columns(2)
@@ -209,7 +249,13 @@ def render_page(
         st.info("No saved results are available for this selection. Standardized benchmarking is pending.")
 
     st.subheader("Performance comparison")
-    st.dataframe(_comparison_frame(selected, model_specs), use_container_width=True, hide_index=True)
+    table_results = _comparison_table_results(results, selected, dataset_type, category)
+    if table_results.get("daniel_bert") and table_results["daniel_bert"].get("result_category") == "historical":
+        st.caption(
+            "Daniel BERT's row is its saved historical 80/10/10 evaluation; "
+            "it is shown for reference and excluded from frozen-split comparisons."
+        )
+    st.dataframe(_comparison_frame(table_results, model_specs), use_container_width=True, hide_index=True)
 
     if all_compatible:
         st.subheader("Detection metrics")
@@ -220,7 +266,11 @@ def render_page(
             template=plotly_template(),
         )
         if detection_figure is not None:
-            st.plotly_chart(detection_figure, use_container_width=True)
+            st.plotly_chart(
+                detection_figure,
+                use_container_width=True,
+                key="team-detection-metrics",
+            )
         else:
             st.info("Detection-metric chart pending actual saved metrics.")
 
@@ -232,11 +282,54 @@ def render_page(
             template=plotly_template(),
         )
         if prf_figure is not None:
-            st.plotly_chart(prf_figure, use_container_width=True)
+            st.plotly_chart(prf_figure, use_container_width=True, key="team-prf-metrics")
         else:
             st.info("Precision/recall chart pending actual saved metrics.")
     else:
         st.info("Detection charts will render once results are available on a shared frozen test split.")
+
+    daniel_result = _model_detail_result(results, selected, "daniel_bert", dataset_type)
+    if daniel_result and daniel_result.get("result_category") == "historical":
+        st.subheader("Daniel BERT historical evaluation")
+        st.warning(
+            daniel_result.get(
+                "training_split_warning",
+                "This original 80/10/10 result is historical and not comparable with frozen-split results.",
+            )
+        )
+        daniel_only_result = {"daniel_bert": daniel_result}
+        metric_figure = metric_comparison_figure(
+            daniel_only_result,
+            {"daniel_bert": model_specs["daniel_bert"]},
+            ["roc_auc", "accuracy", "precision", "recall", "f1"],
+            template=plotly_template(),
+        )
+        if metric_figure is not None:
+            metric_figure.update_layout(title="Daniel BERT — original 80/10/10 test metrics")
+            st.plotly_chart(
+                metric_figure,
+                use_container_width=True,
+                key="daniel-historical-metrics",
+            )
+        confusion_figure = confusion_matrix_figure(daniel_result, template=plotly_template())
+        if confusion_figure is not None:
+            st.plotly_chart(
+                confusion_figure,
+                use_container_width=True,
+                key="daniel-historical-confusion",
+            )
+        latency_figure = latency_quality_figure(
+            [daniel_result],
+            {"daniel_bert": model_specs["daniel_bert"]},
+            template=plotly_template(),
+        )
+        if latency_figure is not None:
+            latency_figure.update_layout(title="Daniel BERT — measured CPU performance")
+            st.plotly_chart(
+                latency_figure,
+                use_container_width=True,
+                key="daniel-historical-cpu-performance",
+            )
 
     st.subheader("Generalization")
     unseen_is_valid = bool(
@@ -253,7 +346,7 @@ def render_page(
             template=plotly_template(),
         )
         if gen_figure is not None:
-            st.plotly_chart(gen_figure, use_container_width=True)
+            st.plotly_chart(gen_figure, use_container_width=True, key="team-generalization")
         else:
             st.info("Standard and unseen-source results for the same model and dataset version are pending.")
         gap_table = generalization_gap_table(
@@ -288,7 +381,7 @@ def render_page(
         highlight_frontier=True,
     )
     if cpu_figure is not None:
-        st.plotly_chart(cpu_figure, use_container_width=True)
+        st.plotly_chart(cpu_figure, use_container_width=True, key="team-cpu-cost")
     else:
         st.info("Accuracy-versus-cost chart pending compatible measured latency and ROC-AUC.")
 
@@ -297,9 +390,13 @@ def render_page(
         "Select a team model",
         TEAM_MODEL_IDS,
         format_func=lambda model_id: model_specs[model_id]["name"],
+        index=TEAM_MODEL_IDS.index("daniel_bert"),
         key="team-model-detail",
     )
-    _render_model_detail(model_specs[detail_id], selected[detail_id])
+    _render_model_detail(
+        model_specs[detail_id],
+        _model_detail_result(results, selected, detail_id, dataset_type),
+    )
 
     show_live_predictions(
         TEAM_MODEL_IDS,
