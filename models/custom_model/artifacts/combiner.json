@@ -1,0 +1,61 @@
+{
+  "members": [
+    "aakash_7th_place",
+    "aditya_3rd_place",
+    "yash_5th_place",
+    "daniel_bert"
+  ],
+  "feature": "logit(clip(p, 1e-6, 1-1e-6))",
+  "rule": "mean_logit",
+  "weights": [
+    0.25,
+    0.25,
+    0.25,
+    0.25
+  ],
+  "bias": 0.0,
+  "threshold_logit": 1.992669149544403,
+  "probability": "sigmoid(weights . logits + bias - threshold_logit) so 0.5 = chosen threshold",
+  "selection": "GroupKFold(5) over validation `source`; test/unseen_test never used for selection",
+  "source_held_out_validation_auc": {
+    "aakash_7th_place": 0.9994951096316453,
+    "aditya_3rd_place": 0.9994091808188929,
+    "yash_5th_place": 0.9994105870613067,
+    "daniel_bert": 0.9997852149744982,
+    "mean_logit": 0.999797575105187,
+    "logistic": 0.999410463706709
+  },
+  "report": {
+    "validation": {
+      "auc": 0.999797575105187,
+      "balanced_accuracy": 0.9977389102243001,
+      "auc_aakash_7th_place": 0.9994951096316453,
+      "auc_aditya_3rd_place": 0.9994091808188929,
+      "auc_yash_5th_place": 0.9993976594994686,
+      "auc_daniel_bert": 0.9997852149744982
+    },
+    "test": {
+      "auc": 0.999908822003974,
+      "balanced_accuracy": 0.9975969565495404,
+      "auc_aakash_7th_place": 0.9996434782471404,
+      "auc_aditya_3rd_place": 0.9995424078332555,
+      "auc_yash_5th_place": 0.9996192529246033,
+      "auc_daniel_bert": 0.9996625723404642
+    },
+    "unseen_test": {
+      "auc": 0.9953437631285809,
+      "balanced_accuracy": 0.9597760344307806,
+      "auc_aakash_7th_place": 0.9997068000637956,
+      "auc_aditya_3rd_place": 0.9993004696351139,
+      "auc_yash_5th_place": 0.9994439936066525,
+      "auc_daniel_bert": 0.969211601408003
+    }
+  },
+  "dataset_hash": "e6f09bceef8d6bd2334034ebcd0cc85f388e116f5abe9d9983d4037f6b611982",
+  "split_fingerprints": {
+    "test": "55f6121fcd64862475926d8340f20f3aaba75071442241bb71b03526adcb66c0",
+    "train": "d061b2abefb14bea38d3a9dfcdb98fcb8634bf749ef3a69b9071888757e80fc1",
+    "unseen_test": "0b635071c9aaccfc9d4973d7b0038db341b40f189fcf67ea8a6239246105e82f",
+    "validation": "86882ce85873ede58dddf5e168385b59adf5245d81aa9ab454914735eb5af4c4"
+  }
+}

@@ -30,12 +30,14 @@ MODEL_SPECS: dict[str, dict[str, Any]] = {
         "short_name": "Custom",
         "group": "champion",
         "member": "CS747 team",
-        "architecture": "Under development; no finalized inference package is available.",
-        "version": "In development",
+        "architecture": "Equal-weight average of the log-odds of four team models (7th-place BPE TF-IDF NB+SGD, "
+                        "Aditya 3rd-place, Yash 5th-place, BERT), all trained on the frozen train split.",
+        "version": "Stacked ensemble v1 (combiner selected on validation with source-held-out folds)",
         "reference": None,
         "reference_label": None,
-        "availability": "Under development",
-        "status_detail": "No trained custom model or fitted inference artifacts are registered.",
+        "availability": "Packaged",
+        "status_detail": "Validation-selected equal-weight ensemble. On unseen_test it scores below its three TF-IDF "
+                         "members because the retrained BERT generalizes worse; reported as-is, not re-tuned.",
     },
     "yash_5th_place": {
         "name": "Yash Koli — 5th-place Efficiency Prize",

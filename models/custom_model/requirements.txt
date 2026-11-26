@@ -1,0 +1,9 @@
+huggingface_hub>=0.23
+joblib>=1.3
+numpy>=1.26
+scipy>=1.10
+scikit-learn>=1.4
+tokenizers>=0.15
+torch>=2.2
+transformers>=4.41
+# Member packages: models/aditya_3rd_place/requirements.txt and models/yash_5th_place/requirements.txt

@@ -32,7 +32,9 @@ def model_availability(model_id: str, repo_root: str | Path) -> tuple[bool, str]
             return True, "Low-memory adaptation artifacts are present; original submission settings are unverified."
         return False, "Adaptation artifacts are incomplete: " + ", ".join(missing)
     if model_id == "custom_model":
-        return False, "Under development: no trained model package is registered."
+        if not (Path(repo_root) / "models" / model_id / "artifacts" / "combiner.json").is_file():
+            return False, "Ensemble combiner artifact is missing: combiner.json"
+        return True, "Stacked ensemble of the four team models; BERT weights load from a pinned Hugging Face revision."
     if model_id == "aakash_7th_place":
         artifacts = Path(repo_root) / "models" / model_id / "artifacts"
         required = ("configuration.json", "tokenizer.json", "model.joblib")
@@ -93,6 +95,14 @@ def load_model_adapter(model_id: str) -> ModelAdapter:
         from models.aakash_7th_place.adapter import AakashSeventhPlaceAdapter
 
         ModelRegistry.register(model_id, AakashSeventhPlaceAdapter)
+        adapter = ModelRegistry.get(model_id)()
+        if not getattr(adapter, "model_ready", False):
+            raise ModelNotAvailableError(adapter.unavailable_reason)
+        return adapter
+    if model_id == "custom_model":
+        from models.custom_model.adapter import CustomEnsembleAdapter
+
+        ModelRegistry.register(model_id, CustomEnsembleAdapter)
         adapter = ModelRegistry.get(model_id)()
         if not getattr(adapter, "model_ready", False):
             raise ModelNotAvailableError(adapter.unavailable_reason)

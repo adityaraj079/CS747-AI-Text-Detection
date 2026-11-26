@@ -1,0 +1,51 @@
+{
+  "result_category": "standardized",
+  "model_id": "custom_model",
+  "dataset_hash": "e6f09bceef8d6bd2334034ebcd0cc85f388e116f5abe9d9983d4037f6b611982",
+  "split_id": "55f6121fcd64862475926d8340f20f3aaba75071442241bb71b03526adcb66c0",
+  "dataset_type": "standard_test",
+  "record_count": 18478,
+  "threshold": 0.5,
+  "timestamp": "2026-11-26T22:30:09.275727+00:00",
+  "software": {
+    "python": "3.11.7",
+    "numpy": "2.4.6",
+    "pandas": "3.1.1",
+    "scikit_learn": "1.6.1"
+  },
+  "benchmark": {
+    "batch_size": 256,
+    "warmup_steps": 3,
+    "repeats": 5,
+    "median_elapsed_seconds": 4.26132164336741,
+    "milliseconds_per_essay": 16.645787669403944,
+    "throughput_essays_per_second": 60.07525866967929,
+    "peak_ram_mb": 1899.93359375,
+    "cpu_model": "x86_64",
+    "system_info": "Linux-4.18.0-553.137.1.el8_10.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.7",
+    "thread_count": 64
+  },
+  "roc_auc": 0.999908822003974,
+  "accuracy": 0.9975646715012447,
+  "precision": 0.9996226652411798,
+  "recall": 0.9975524036651187,
+  "f1": 0.9985864614418093,
+  "confusion_matrix": [
+    [
+      2538,
+      6
+    ],
+    [
+      39,
+      15895
+    ]
+  ],
+  "latency_ms_per_essay": 16.645787669403944,
+  "throughput": 60.07525866967929,
+  "cpu_model": "x86_64",
+  "thread_count": 64,
+  "batch_size": 256,
+  "peak_ram_mb": 1899.93359375,
+  "model_size_mb": 436.75471591949463
+}

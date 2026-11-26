@@ -1,0 +1,38 @@
+{
+  "model_id": "aakash_7th_place",
+  "variant": "retrained on frozen train for models/custom_model",
+  "dataset_hash": "e6f09bceef8d6bd2334034ebcd0cc85f388e116f5abe9d9983d4037f6b611982",
+  "split_fingerprints": {
+    "test": "55f6121fcd64862475926d8340f20f3aaba75071442241bb71b03526adcb66c0",
+    "train": "d061b2abefb14bea38d3a9dfcdb98fcb8634bf749ef3a69b9071888757e80fc1",
+    "unseen_test": "0b635071c9aaccfc9d4973d7b0038db341b40f189fcf67ea8a6239246105e82f",
+    "validation": "86882ce85873ede58dddf5e168385b59adf5245d81aa9ab454914735eb5af4c4"
+  },
+  "tokenizer_fit_partition": "train",
+  "vocabulary_fit_partition": "train",
+  "idf_fit_partition": "train",
+  "validation_use": "reported AUC and threshold only",
+  "max_features": 500000,
+  "min_df": 2,
+  "mnb_alpha": 0.0225,
+  "sgd": {
+    "loss": "modified_huber",
+    "tol": 0.0001,
+    "random_state": 6743,
+    "epochs": 13
+  },
+  "weights": [
+    0.43,
+    0.57
+  ],
+  "val_auc_ensemble": 0.9994951096316455,
+  "val_auc_mnb": 0.9987504672672161,
+  "val_auc_sgd": 0.9995059154944032,
+  "threshold_from_val": 0.32,
+  "val_accuracy_at_threshold": 0.9951290793960058,
+  "libs": {
+    "python": "3.11.7",
+    "numpy": "2.4.6",
+    "scikit_learn": "1.6.1"
+  }
+}
