@@ -54,6 +54,24 @@ The records are in `results/metrics/standardized/custom_model_*_20261126T*.json`
 `combiner.json`. The latency in these records (about 17 ms per essay) was measured on Hopper with an A100 3g.40gb
 GPU slice available, so it is **not** comparable with the CPU-only latency of the other models.
 
+### External benchmarks (`evaluate_external.py`, run once)
+
+The samples come from the shared scripts' own selection code (same seeds, pinned files, and overlap screening).
+The shared result files were not modified.
+
+| ROC-AUC | Ghostbuster essays (200) | HC3 answers (2,000) | Wiki intros (100,000) |
+|---|---|---|---|
+| **Ensemble** | 0.963 | 0.909 | 0.689 |
+| 7th place (retrained) | **0.981** | 0.857 | 0.644 |
+| Aditya 3rd place | 0.781 | 0.846 | 0.624 |
+| Yash 5th place | 0.963 | 0.860 | 0.639 |
+| BERT (retrained) | 0.442 | **0.919** | **0.736** |
+
+The ensemble is the most consistent across the three benchmarks. BERT's failure on Ghostbuster pulls the ensemble
+below the 7th-place member there. Aditya's numbers match `results/metrics/standardized/*.json` exactly, which confirms
+the samples are the same. Yash's wiki number also matches, but his Ghostbuster and HC3 numbers are higher here than in
+the shared files (0.908 and 0.808). The cause has not been found.
+
 **Known limitation.** On unseen sources the ensemble scores below three of its members, because the retrained
 BERT generalizes much worse. Validation could not detect this: every candidate scored about 0.9995 there. The rule
 was not re-selected after seeing unseen_test, because the team protocol forbids tuning on test data.
@@ -75,7 +93,7 @@ was not re-selected after seeing unseen_test, because the team protocol forbids 
   zero weight. BERT loads from `artifacts/bert/` when the weights are present; otherwise it downloads them from the
   pinned Hugging Face revision.
 - `train_seventh.py`, `train_bert.py`, and `build_ensemble.py` reproduce the training. The `*.sbatch` files are the
-  Slurm jobs used on GMU Hopper (partition `gpuq` or `normal`), and `evaluate.sbatch` ran the shared evaluator.
+  Slurm jobs used on GMU Hopper (partition `gpuq` or `normal`), `evaluate.sbatch` ran the shared evaluator, and `evaluate_external.sbatch` ran the external benchmarks.
 - `tests/test_adapter.py` covers empty input, missing artifacts, and output shape, range, and orientation. It uses
   fakes and needs no large files.
 
