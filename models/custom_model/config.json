@@ -1,0 +1,55 @@
+{
+  "model_id": "custom_model",
+  "team_member": "CS747 team (packaged by Aakash Patil)",
+  "solution_name": "Custom stacked ensemble of the four team models",
+  "competition": "LLM - Detect AI Generated Text",
+  "competition_track": "Team custom model (not a competition submission)",
+  "source_reference": null,
+  "architecture": "P(AI) = sigmoid(mean(logit(p_member)) - threshold_logit) over: aakash_7th_place (retrained), aditya_3rd_place, yash_5th_place, daniel_bert (retrained)",
+  "label_orientation": "1 = AI-generated",
+  "members": {
+    "aakash_7th_place": "artifacts/seventh/, retrained on the frozen train split by train_seventh.py (tokenizer, vocabulary, and IDF fit on train; top 500,000 n-grams)",
+    "aditya_3rd_place": "models/aditya_3rd_place/artifacts, used unchanged (already fit on the frozen train split)",
+    "yash_5th_place": "models/yash_5th_place/artifacts, used unchanged (already fit on the frozen train split)",
+    "daniel_bert": "artifacts/bert/ (Hugging Face, pinned below), retrained on the frozen train split by train_bert.py"
+  },
+  "combiner_selection": "Candidates were each single member, an equal mean of logits, and logistic regression on logits. They were compared by GroupKFold(5)-over-source ROC-AUC on validation. mean_logit won. The threshold maximises held-out balanced accuracy. Test and unseen_test were not used for any choice.",
+  "frozen_split_compliance": true,
+  "dataset_hash": "e6f09bceef8d6bd2334034ebcd0cc85f388e116f5abe9d9983d4037f6b611982",
+  "train_split_fingerprint": "d061b2abefb14bea38d3a9dfcdb98fcb8634bf749ef3a69b9071888757e80fc1",
+  "validation_split_fingerprint": "86882ce85873ede58dddf5e168385b59adf5245d81aa9ab454914735eb5af4c4",
+  "adaptations_from_originals": [
+    "7th place: the tokenizer, vocabulary, and IDF are fit on train (the original fit them on target or test text), and the vocabulary is capped at 500,000 n-grams.",
+    "BERT: learning rate 2e-5 with 6% warmup and weight decay 0.01. The notebook default of 5e-5 collapsed to the majority class (val AUC 0.49). Also bf16, dynamic padding, and the fast tokenizer.",
+    "BERT: the best epoch was epoch 1 (val AUC 0.99978). Early stopping used patience 2."
+  ],
+  "known_limitations": "On unseen_test the ensemble (AUC 0.9953) scores below three of its members (0.9993-0.9997) because the retrained BERT generalizes worse (0.9692). Validation could not detect this because every candidate scored about 0.9995 there. This is reported as-is, with no re-selection on test data. Aditya's artifacts were pickled with scikit-learn 1.7.2, and the Hopper scoring used 1.6.1 (InconsistentVersionWarning). The scores were checked against scikit-learn 1.9.1 on 300 validation essays and were identical (max diff 1e-16). Yash's adapter requires exactly scikit-learn 1.6.1 and lightgbm 4.6.0.",
+  "bert_huggingface_model_id": "JaCkKnite12/cs747-custom-bert",
+  "bert_huggingface_revision": "2710a1b04978f4bd6a24b980f749759f4e56c822",
+  "bert_training": {
+    "base_model": "bert-base-uncased",
+    "max_length": 512,
+    "lr": 2e-05,
+    "warmup_ratio": 0.06,
+    "weight_decay": 0.01,
+    "batch": 8,
+    "max_epochs": 10,
+    "patience": 2,
+    "bf16": true,
+    "seed": 747,
+    "val_auc": 0.9997811196018548
+  },
+  "training_hardware": "GMU Hopper: CPU node (7th place, 5 min, 19 GB) and an A100 80GB (BERT, about 25 min)",
+  "dependencies": "requirements.txt plus the member packages' requirements",
+  "artifacts": [
+    "artifacts/combiner.json",
+    "artifacts/seventh/tokenizer.json",
+    "artifacts/seventh/model.joblib",
+    "artifacts/seventh/configuration.json",
+    "Hugging Face: bert_huggingface_model_id at bert_huggingface_revision"
+  ],
+  "cpu_compatible": true,
+  "inference_mode": "CPU or GPU (BERT member is slow on CPU)",
+  "license_and_redistribution": "bert-base-uncased is Apache-2.0; BERT member published Apache-2.0 at JaCkKnite12/cs747-custom-bert. Model owner confirmed rights to publish weights trained on the team dataset.",
+  "integration_status": "Adapter registered in app_components/model_registry.py"
+}
